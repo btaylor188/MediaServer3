@@ -1,0 +1,17 @@
+version: '3.3'
+services:
+    netdata:
+        container_name: netdata
+        ports:
+            - 19999:19999
+        volumes:
+            - /proc:/host/proc:ro
+            - /sys:/host/sys:ro
+            - /var/run/docker.sock:/var/run/docker.sock
+        networks:
+          - internal
+        restart: always
+        image: titpetric/netdata
+networks:
+  internal:
+    external: true

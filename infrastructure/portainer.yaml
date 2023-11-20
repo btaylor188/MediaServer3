@@ -1,0 +1,22 @@
+version: '3.3'
+services:
+    portainer-ce:
+        container_name: portainer
+        ports:
+            - 9000:9000
+        privileged: false
+        entrypoint:
+            - /portainer
+        environment:
+            - PUID=1000
+            - PGID=1000
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - $DOCKERPATH/portainer/data:/data
+        networks:
+          - internal
+        restart: always
+        image: portainer/portainer-ce
+networks:
+  internal:
+    external: true

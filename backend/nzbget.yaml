@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+    nzbget:
+        container_name: nzbget
+        ports:
+            - 6789:6789
+        environment:
+            - LC_ALL=C
+            - PUID=1000
+            - PGID=1000
+            - HOME=/root
+            - TERM=xterm
+        volumes:
+          - /etc/localtime:/etc/localtime
+          - $DOCKERPATH/nzbget:/config
+          - $DOCKERRPATH/processing:/mnt/processing
+          - $MEDIAPATH:/mnt/Media
+          - /tmp:/tmp
+        networks:
+          - internal
+        restart: always
+        image: linuxserver/nzbget:latest
+networks:
+  internal:
+    external: true

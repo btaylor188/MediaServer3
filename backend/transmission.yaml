@@ -1,0 +1,23 @@
+version: '3.3'
+services:
+  transmission-openvpn:
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - /mnt/processing:/data
+    environment:
+      - OPENVPN_PROVIDER=PIA
+      - OPENVPN_CONFIG=netherlands
+      - OPENVPN_USERNAME=$PIAUSER
+      - OPENVPN_PASSWORD=$PIAPASS
+      - LOCAL_NETWORK=$LOCALNET
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - internal
+    ports:
+      - 9091:9091
+    image: haugene/transmission-openvpn
+networks:
+  internal:
+    external: true

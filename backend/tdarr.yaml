@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+    tdarr:
+        container_name: tdarr_server
+        volumes:
+          - $DOCKERPATH/tdarr/server:/app/server
+          - $DOCKERPATH/tdarr/configs:/app/configs
+          - $DOCKERPATH/tdarr/logs:/app/logs
+          - $MEDIAPATH:/media
+          - /temp:/temp
+        environment:
+          - serverIP=0.0.0.0
+          - serverPort=8266
+          - webUIPort=8265
+          - TZ=America/Denver
+          - PUID=1000
+          - PGID=1000
+        ports:
+          - 8265:8265
+          - 8266:8266
+        networks:
+          - internal
+        restart: always
+        image: haveagitgat/tdarr
+
+    tdarr_node:
+        container_name: tdarr_node
+        volumes:
+          - $DOCKERPATH/tdarr/configs:/app/configs
+          - $DOCKERPATH/tdarr/logs:/app/logs
+          - $MEDIAPATH:/media
+          - /temp:/temp
+        network_mode: service:tdarr
+        environment:
+          - nodeID=Node1
+          - serverIP=0.0.0.0
+          - serverPort=8266
+          - TZ=America/Denver
+          - PUID=1000
+          - PGID=1000
+          - NVIDIA_DRIVER_CAPABILITIES=all
+          - NVIDIA_VISIBLE_DEVICES=all
+        ports:
+          - 8267:8267
+#        devices:
+#          - /dev/dri:/dev/dri
+        restart: always
+        image: haveagitgat/tdarr_node
+networks:
+  internal:
+    external: true

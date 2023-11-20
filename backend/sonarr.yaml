@@ -1,0 +1,25 @@
+version: '3.3'
+services:
+    sonarr:
+        container_name: sonarr
+        ports:
+            - 8989:8989
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - HOME=/root
+            - TERM=xterm
+            - XDG_CONFIG_HOME=/config/xdg
+            - LANGUAGE=en_US.UTF-8
+            - LANG=en_US.UTF-8
+        volumes:
+          - /etc/localtime:/etc/localtime
+          - $DOCKERPATH/sonarr:/config
+          - $MEDIAPATH:/mnt/Media
+        networks:
+          - internal
+        restart: always
+        image: linuxserver/sonarr:latest
+networks:
+  internal:
+    external: true

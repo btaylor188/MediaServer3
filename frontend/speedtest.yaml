@@ -1,0 +1,20 @@
+version: '3.3'
+services:
+    speedtest:
+        container_name: speedtest
+        ports:
+            - 8223:8223
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TITLE=$DOMAINNAME
+            - WEBPORT=8223
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+        networks:
+          - internal
+        restart: always
+        image: adolfintel/speedtest
+networks:
+  internal:
+    external: true

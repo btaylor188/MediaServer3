@@ -1,0 +1,17 @@
+version: '3.3'
+services:
+    overseerr:
+        container_name: overseerr
+        environment:
+            - PUID=1000
+            - PGID=1000
+            - TZ=America/Denver
+        ports:
+            - 5055:5055
+        volumes:
+            - $DOCKERPATH/overseerr/config:/config
+        restart: unless-stopped
+        image: linuxserver/overseerr
+networks:
+  internal:
+    external: true

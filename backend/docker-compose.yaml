@@ -1,0 +1,150 @@
+version: '3.3'
+services:
+  nzbget:
+    container_name: nzbget
+    ports:
+      - 6789:6789
+    environment:
+      - LC_ALL=C
+      - PUID=1000
+      - PGID=1000
+      - HOME=/root
+      - TERM=xterm
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - $DOCKERPATH/nzbget:/config
+      - $DOCKERPATH/processing:/mnt/processing
+      - $MEDIAPATH:/mnt/Media
+      - /tmp:/tmp
+    networks:
+      - internal
+    restart: always
+    image: linuxserver/nzbget:latest
+  sonarr:
+    container_name: sonarr
+    ports:
+      - 8989:8989
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - HOME=/root
+      - TERM=xterm
+      - XDG_CONFIG_HOME=/config/xdg
+      - LANGUAGE=en_US.UTF-8
+      - LANG=en_US.UTF-8
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - $DOCKERPATH/sonarr:/config
+      - $MEDIAPATH:/mnt/Media
+      - $DOCKERPATH/processing:/mnt/processing
+    networks:
+      - internal
+    restart: always
+    image: linuxserver/sonarr:latest
+  radarr:
+    container_name: radarr
+    ports:
+      - 7878:7878
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - HOME=/root
+      - TERM=xterm
+      - XDG_CONFIG_HOME=/config/xdg
+      - LANGUAGE=en_US.UTF-8
+      - LANG=en_US.UTF-8
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - $DOCKERPATH/radarr:/config
+      - $MEDIAPATH:/mnt/Media
+      - $DOCKERPATH/processing:/mnt/processing
+    networks:
+      - internal
+    restart: always
+    image: linuxserver/radarr:latest
+  bazarr:
+    container_name: bazarr
+    ports:
+      - 6767:6767
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - HOME=/root
+      - TERM=xterm
+      - XDG_CONFIG_HOME=/config/xdg
+      - LANGUAGE=en_US.UTF-8
+      - LANG=en_US.UTF-8
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - $DOCKERPATH:/config
+      - $MEDIAPATH:/mnt/Media
+    networks:
+      - internal
+    restart: always
+    image: linuxserver/bazarr:latest
+  tdarr:
+    container_name: tdarr_server
+    volumes:
+      - $DOCKERPATH/tdarr/server:/app/server
+      - $DOCKERPATH/tdarr/configs:/app/configs
+      - $DOCKERPATH/tdarr/logs:/app/logs
+      - $MEDIAPATH:/media
+      - /temp:/temp
+    environment:
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - webUIPort=8265
+      - TZ=America/Denver
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - 8265:8265
+      - 8266:8266
+    networks:
+      - internal
+    restart: always
+    image: haveagitgat/tdarr
+  tdarr_node:
+    container_name: tdarr_node
+    volumes:
+      - $DOCKERPATH/tdarr/configs:/app/configs
+      - $DOCKERPATH/tdarr/logs:/app/logs
+      - $MEDIAPATH:/media
+      - /temp:/temp
+    network_mode: service:tdarr
+#    runtime: nvidia
+    environment:
+      - nodeID=Node01
+      - serverIP=0.0.0.0
+      - serverPort=8266
+      - TZ=America/Denver
+      - PUID=1000
+      - PGID=1000
+#      - NVIDIA_DRIVER_CAPABILITIES=all
+#      - NVIDIA_VISIBLE_DEVICES=all
+    devices:
+      - /dev/dri:/dev/dri
+    restart: always
+    image: haveagitgat/tdarr_node
+  transmission-openvpn:
+    container_name: transmission-w-vpn
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - $DOCKERPATH/processing:/data
+    environment:
+      - OPENVPN_PROVIDER=PIA
+      - OPENVPN_CONFIG=us_denver
+      - OPENVPN_USERNAME=$PIAUSER
+      - OPENVPN_PASSWORD=$PIAPASS
+      - LOCAL_NETWORK=$LOCALNET
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - internal
+    ports:
+      - 9091:9091
+    image: haugene/transmission-openvpn
+networks:
+  internal:
+    external: true

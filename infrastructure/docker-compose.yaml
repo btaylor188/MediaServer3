@@ -1,0 +1,70 @@
+version: '3.3'
+services:
+  portainer-ce:
+    container_name: portainer
+    ports:
+      - 9000:9000
+    privileged: false
+    entrypoint:
+      - /portainer
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $DOCKERPATH/portainer/data:/data
+    networks:
+      - internal
+    restart: always
+    image: portainer/portainer-ce
+  watchtower:
+    container_name: watchtower
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    restart: always
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=86400
+    image: containrrr/watchtower
+  netdata:
+    container_name: netdata
+    ports:
+      - 19999:19999
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - internal
+    restart: always
+    image: titpetric/netdata
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    container_name: duckdns
+    networks:
+      - external
+    environment:
+      - PUID=1000 #optional
+      - PGID=1000 #optional
+      - TZ=America/Denver
+      - SUBDOMAINS=$DOMAINNAME
+      - TOKEN=$DUCKDNSTOKEN
+      - LOG_FILE=false #optional
+    volumes:
+      - $DOCKERPATH/duckdns:/config #optional
+    restart: unless-stopped
+  uptime-kuma:
+    restart: always
+    ports:
+      - '3001:3001'
+    networks:
+      - internal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - $DOCKERPATH/uptime-kuma:/app/data
+    container_name: uptime-kuma
+    image: 'louislam/uptime-kuma:1'
+networks:
+  internal:
+    external: true
+  external:
+    external: true

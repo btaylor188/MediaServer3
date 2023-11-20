@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+    watchtower:
+        container_name: watchtower
+        volumes:
+            - '/var/run/docker.sock:/var/run/docker.sock'
+        restart: always
+        environment:
+            - WATCHTOWER_POLL_INTERVAL=86400
+        image: containrrr/watchtower
