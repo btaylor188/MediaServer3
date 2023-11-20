@@ -14,6 +14,7 @@ services:
       - db
     volumes:
       - /opt/docker/nextcloud/html:/var/www/html
+      - /mnt/Storage/NextCloud:/var/www/html/data
     environment:
       - MYSQL_PASSWORD=$NCDBUSER
       - MYSQL_DATABASE=nextcloud
