@@ -7,6 +7,10 @@ echo "Enter path for Docker data.  ie. /mnt/docker"
 read DOCKERPATH
 sudo mkdir $DOCKERPATH
 
+echo "Enter path for temp processing.  ie. /mnt/processing"
+read PROCESSPATH
+sudo mkdir $PROCESSPATH
+
 echo "Enter path for Plex Media"
 read MEDIAPATH 
 sudo mkdir $MEDIAPATH
@@ -32,12 +36,10 @@ read NCDBROOT
 echo "Nextcloud DB User Password"
 read NCDBUSER
 
-##Generate Secret Key
-SECRETKEY=$(hexdump -n 16 -e '4/4 "%08X" 1 "\n"' /dev/random)
 
 export DOMAINNAME=$DOMAINNAME
 export DOCKERPATH=$DOCKERPATH
-export SECRETKEY=$SECRETKEY
+export PROCESSPATH=$PROCESSPATH
 export MEDIAPATH=$MEDIAPATH
 export PLEXCLAIM=$PLEXCLAIM
 export PIAUSER=$PIAUSER
@@ -45,7 +47,7 @@ export PIAPASS=$PIAPASS
 export LOCALNET=$LOCALNET
 export DUCKDNSTOKEN=$DUCKDNSTOKEN
 export NCDBROOT=$NCDBROOT
-export NCDBUSER-$NCDBUSER
+export NCDBUSER=$NCDBUSER
 
 sudo rm ./frontend/.env
 sudo rm ./backend/.env
@@ -53,7 +55,7 @@ sudo rm ./infrastructure/.env
 cat > ./frontend/.env << EOF1
 DOMAINNAME=$DOMAINNAME
 DOCKERPATH=$DOCKERPATH
-SECRETKEY=$SECRETKEY
+PROCESSPATH=$PROCESSPATH
 MEDIAPATH=$MEDIAPATH
 PLEXCLAIM=$PLEXCLAIM
 PIAUSER=$PIAUSER
@@ -67,7 +69,7 @@ EOF1
 cat > ./backend/.env << EOF1
 DOMAINNAME=$DOMAINNAME
 DOCKERPATH=$DOCKERPATH
-SECRETKEY=$SECRETKEY
+PROCESSPATH=$PROCESSPATH
 MEDIAPATH=$MEDIAPATH
 PLEXCLAIM=$PLEXCLAIM
 PIAUSER=$PIAUSER
@@ -79,7 +81,7 @@ EOF1
 cat > ./infrastructure/.env << EOF1
 DOMAINNAME=$DOMAINNAME
 DOCKERPATH=$DOCKERPATH
-SECRETKEY=$SECRETKEY
+PROCESSPATH=$PROCESSPATH
 MEDIAPATH=$MEDIAPATH
 PLEXCLAIM=$PLEXCLAIM
 PIAUSER=$PIAUSER
