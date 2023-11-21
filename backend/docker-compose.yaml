@@ -13,7 +13,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime
       - $DOCKERPATH/nzbget:/config
-      - /opt/processing:/mnt/processing
+      - $PROCESSPATH:/mnt/processing
       - $MEDIAPATH:/mnt/Media
       - /tmp:/tmp
     networks:
@@ -36,7 +36,7 @@ services:
       - /etc/localtime:/etc/localtime
       - $DOCKERPATH/sonarr:/config
       - $MEDIAPATH:/mnt/Media
-      - /opt/processing:/mnt/processing
+      - $PROCESSPATH:/mnt/processing
     networks:
       - internal
     restart: always
@@ -57,7 +57,7 @@ services:
       - /etc/localtime:/etc/localtime
       - $DOCKERPATH/radarr:/config
       - $MEDIAPATH:/mnt/Media
-      - /opt/processing:/mnt/processing
+      - $PROCESSPATH:/mnt/processing
     networks:
       - internal
     restart: always
