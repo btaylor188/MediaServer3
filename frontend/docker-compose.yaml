@@ -58,36 +58,6 @@ services:
       - internal
     restart: always
     image: adolfintel/speedtest
-  app:
-    image: nextcloud
-    restart: always
-    ports:
-      - 8087:80
-    links:
-      - ncdb
-    volumes:
-      - /opt/docker/nextcloud/html:/var/www/html
-      - /mnt/Storage/NextCloud:/var/www/html/data
-    environment:
-      - MYSQL_PASSWORD=$NCDBUSER
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_HOST=db
-    networks:
-      - internal
-  ncdb:
-    image: mariadb:10.6
-    restart: always
-    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
-    volumes:
-      - /opt/docker/nextcloud/db:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=$NCDBROOT
-      - MYSQL_PASSWORD=$NCDBUSER
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-    networks:
-      - internal
 networks:
   internal:
     external: true
