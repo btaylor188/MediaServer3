@@ -62,7 +62,6 @@ services:
       - internal
     restart: always
     image: linuxserver/radarr:latest
-    version: "2.1"
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
