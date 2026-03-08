@@ -8,84 +8,202 @@ cleanup() {
 }
 trap cleanup EXIT
 
-####### Define Variables ######
-echo "What is the domain name?"
-read DOMAINNAME
+# ─────────────────────────────────────────────
+#  Service selection menu
+# ─────────────────────────────────────────────
+SERVICES=(portainer watchtower netdata duckdns uptime-kuma nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr speedtest nextcloud)
 
-echo "Enter path for Docker data (e.g. /mnt/docker):"
-read DOCKERPATH
+LABELS=(
+    "Portainer         Docker management UI"
+    "Watchtower        Automatic container updates"
+    "Netdata           System monitoring"
+    "DuckDNS           Dynamic DNS"
+    "Uptime Kuma       Uptime monitoring"
+    "NZBGet            Usenet downloader"
+    "Transmission+VPN  Torrent downloader (requires PIA credentials)"
+    "Prowlarr          Indexer manager"
+    "Sonarr            TV show automation"
+    "Radarr            Movie automation"
+    "Bazarr            Subtitle automation"
+    "Tdarr             Media transcoding"
+    "Plex              Media server"
+    "Overseerr         Media requests"
+    "Speedtest         Network speed test"
+    "Nextcloud         File storage (requires DB credentials)"
+)
+
+GROUPS=(
+    "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
+    "Backend" "Backend" "Backend" "Backend" "Backend" "Backend" "Backend"
+    "Frontend" "Frontend" "Frontend" "Frontend"
+)
+
+# Default: all selected except Nextcloud
+SELECTED=(1 1 1 1 1  1 1 1 1 1 1 1  1 1 1 0)
+
+show_menu() {
+    echo ""
+    echo "┌──────────────────────────────────────────────────────────────┐"
+    echo "│              Media Server — Select Services                  │"
+    echo "├──────────────────────────────────────────────────────────────┤"
+    local last_group=""
+    for i in "${!SERVICES[@]}"; do
+        local group="${GROUPS[$i]}"
+        if [[ "$group" != "$last_group" ]]; then
+            printf "│                                                              │\n"
+            printf "│  ── %-57s│\n" "$group ──"
+            last_group="$group"
+        fi
+        local mark="[ ]"
+        [[ "${SELECTED[$i]}" == "1" ]] && mark="[x]"
+        printf "│  %2d) %s  %-48s│\n" "$((i+1))" "$mark" "${LABELS[$i]}"
+    done
+    echo "│                                                              │"
+    echo "└──────────────────────────────────────────────────────────────┘"
+    echo ""
+    echo "  Enter number(s) to toggle (e.g. '3' or '1 4 7')"
+    echo "  'a' = select all  |  'n' = deselect all  |  'done' = confirm"
+}
+
+while true; do
+    show_menu
+    read -rp "  > " input
+    case "$input" in
+        done) break ;;
+        a) SELECTED=(1 1 1 1 1  1 1 1 1 1 1 1  1 1 1 1) ;;
+        n) SELECTED=(0 0 0 0 0  0 0 0 0 0 0 0  0 0 0 0) ;;
+        *)
+            for num in $input; do
+                if [[ "$num" =~ ^[0-9]+$ ]] && (( num >= 1 && num <= ${#SERVICES[@]} )); then
+                    idx=$((num - 1))
+                    [[ "${SELECTED[$idx]}" == "1" ]] && SELECTED[$idx]=0 || SELECTED[$idx]=1
+                fi
+            done
+            ;;
+    esac
+done
+
+# Returns 0 (true) if the named service is selected
+is_selected() {
+    for i in "${!SERVICES[@]}"; do
+        if [[ "${SERVICES[$i]}" == "$1" && "${SELECTED[$i]}" == "1" ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# Builds --profile args for given service names
+profile_args() {
+    local args=""
+    for svc in "$@"; do
+        is_selected "$svc" && args="$args --profile $svc"
+    done
+    echo "$args"
+}
+
+# ─────────────────────────────────────────────
+#  Collect credentials (only what's needed)
+# ─────────────────────────────────────────────
+echo ""
+echo "── Required Settings ──"
+
+echo "Domain name:"
+read -r DOMAINNAME
+
+echo "Path for Docker data (e.g. /mnt/docker):"
+read -r DOCKERPATH
 sudo mkdir -p "$DOCKERPATH"
 
-echo "Enter path for temp processing (e.g. /mnt/processing):"
-read PROCESSPATH
+echo "Path for temp processing (e.g. /mnt/processing):"
+read -r PROCESSPATH
 sudo mkdir -p "$PROCESSPATH"
 
-echo "Enter path for Plex Media:"
-read MEDIAPATH
+echo "Path for media (e.g. /mnt/media):"
+read -r MEDIAPATH
 sudo mkdir -p "$MEDIAPATH"
 
-echo "Enter Claim token from plex.tv/claim:"
-read PLEXCLAIM
-
-echo "PIA VPN Username:"
-read PIAUSER
-
-echo "PIA VPN Password:"
-read -s PIAPASS
-echo
-
-echo "Enter Local Network in CIDR Notation (e.g. 192.168.1.0/24):"
-read LOCALNET
-
-echo "DuckDNS Token:"
-read -s DUCKDNSTOKEN
-echo
-
-echo "Nextcloud DB Root Password:"
-read -s NCDBROOT
-echo
-
-echo "Nextcloud DB User Password:"
-read -s NCDBUSER
-echo
-
 echo "Timezone (e.g. America/Denver):"
-read TZ
+read -r TZ
 
 PUID=1000
 PGID=1000
-###############################
 
-COMMON_ENV="DOMAINNAME=$DOMAINNAME
-DOCKERPATH=$DOCKERPATH
-PROCESSPATH=$PROCESSPATH
-MEDIAPATH=$MEDIAPATH
-PLEXCLAIM=$PLEXCLAIM
-PIAUSER=$PIAUSER
-PIAPASS=$PIAPASS
-LOCALNET=$LOCALNET
-DUCKDNSTOKEN=$DUCKDNSTOKEN
-TZ=$TZ
-PUID=$PUID
-PGID=$PGID"
+if is_selected plex; then
+    echo "Plex claim token (from plex.tv/claim):"
+    read -r PLEXCLAIM
+fi
 
-printf '%s\nNCDBROOT=%s\nNCDBUSER=%s\n' "$COMMON_ENV" "$NCDBROOT" "$NCDBUSER" > ./frontend/.env
+if is_selected transmission; then
+    echo "PIA VPN Username:"
+    read -r PIAUSER
+    echo "PIA VPN Password:"
+    read -rs PIAPASS
+    echo
+    echo "Local network in CIDR notation (e.g. 192.168.1.0/24):"
+    read -r LOCALNET
+fi
+
+if is_selected duckdns; then
+    echo "DuckDNS token:"
+    read -rs DUCKDNSTOKEN
+    echo
+fi
+
+if is_selected nextcloud; then
+    echo "Nextcloud DB root password:"
+    read -rs NCDBROOT
+    echo
+    echo "Nextcloud DB user password:"
+    read -rs NCDBUSER
+    echo
+fi
+
+# ─────────────────────────────────────────────
+#  Write .env files
+# ─────────────────────────────────────────────
+COMMON_ENV="DOMAINNAME=${DOMAINNAME}
+DOCKERPATH=${DOCKERPATH}
+PROCESSPATH=${PROCESSPATH}
+MEDIAPATH=${MEDIAPATH}
+PLEXCLAIM=${PLEXCLAIM:-}
+PIAUSER=${PIAUSER:-}
+PIAPASS=${PIAPASS:-}
+LOCALNET=${LOCALNET:-}
+DUCKDNSTOKEN=${DUCKDNSTOKEN:-}
+TZ=${TZ}
+PUID=${PUID}
+PGID=${PGID}"
+
+printf '%s\nNCDBROOT=%s\nNCDBUSER=%s\n' "$COMMON_ENV" "${NCDBROOT:-}" "${NCDBUSER:-}" > ./frontend/.env
 printf '%s\n' "$COMMON_ENV" > ./backend/.env
 printf '%s\n' "$COMMON_ENV" > ./infrastructure/.env
 
-##########   Docker ###########
+# ─────────────────────────────────────────────
+#  Install Docker
+# ─────────────────────────────────────────────
 bash ./docker.sh
-###############################
 
-########  Create Docker Networks  ########
+# ─────────────────────────────────────────────
+#  Create Docker networks (idempotent)
+# ─────────────────────────────────────────────
 sudo docker network inspect internal >/dev/null 2>&1 || \
     sudo docker network create -d bridge --subnet=172.19.0.0/24 internal
 sudo docker network inspect external >/dev/null 2>&1 || \
     sudo docker network create -d bridge --subnet=172.20.0.0/24 external
-##########################################
 
-#########  Install Components  ###########
-sudo docker compose -f ./infrastructure/docker-compose.yaml up -d
-sudo docker compose -f ./backend/docker-compose.yaml up -d
-sudo docker compose -f ./frontend/docker-compose.yaml up -d
-##########################################
+# ─────────────────────────────────────────────
+#  Deploy selected services
+# ─────────────────────────────────────────────
+INFRA_ARGS=$(profile_args portainer watchtower netdata duckdns uptime-kuma)
+BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr bazarr tdarr)
+FRONTEND_ARGS=$(profile_args plex overseerr speedtest)
+NEXTCLOUD_ARGS=$(profile_args nextcloud)
+
+[[ -n "$INFRA_ARGS" ]]     && sudo docker compose -f ./infrastructure/docker-compose.yaml $INFRA_ARGS up -d
+[[ -n "$BACKEND_ARGS" ]]   && sudo docker compose -f ./backend/docker-compose.yaml $BACKEND_ARGS up -d
+[[ -n "$FRONTEND_ARGS" ]]  && sudo docker compose -f ./frontend/docker-compose.yaml $FRONTEND_ARGS up -d
+[[ -n "$NEXTCLOUD_ARGS" ]] && sudo docker compose -f ./frontend/nextcloud.yaml $NEXTCLOUD_ARGS up -d
+
+echo ""
+echo "Installation complete!"

@@ -1,6 +1,7 @@
 services:
   nzbget:
     container_name: nzbget
+    profiles: [nzbget]
     ports:
       - 6789:6789
     environment:
@@ -23,6 +24,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   sonarr:
     container_name: sonarr
+    profiles: [sonarr]
     ports:
       - 8989:8989
     environment:
@@ -46,6 +48,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   radarr:
     container_name: radarr
+    profiles: [radarr]
     ports:
       - 7878:7878
     environment:
@@ -70,6 +73,7 @@ services:
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
+    profiles: [prowlarr]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -85,6 +89,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   bazarr:
     container_name: bazarr
+    profiles: [bazarr]
     ports:
       - 6767:6767
     environment:
@@ -107,6 +112,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   tdarr:
     container_name: tdarr_server
+    profiles: [tdarr]
     volumes:
       - ${DOCKERPATH}/tdarr/server:/app/server
       - ${DOCKERPATH}/tdarr/configs:/app/configs
@@ -131,6 +137,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   tdarr_node:
     container_name: tdarr_node
+    profiles: [tdarr]
     volumes:
       - ${DOCKERPATH}/tdarr/configs:/app/configs
       - ${DOCKERPATH}/tdarr/logs:/app/logs
@@ -155,6 +162,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   transmission-openvpn:
     container_name: transmission-w-vpn
+    profiles: [transmission]
     cap_add:
       - NET_ADMIN
     volumes:

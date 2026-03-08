@@ -1,6 +1,7 @@
 services:
   pms-docker:
     container_name: plex
+    profiles: [plex]
     devices:
       - /dev/dri:/dev/dri
 #    runtime: nvidia
@@ -32,6 +33,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   overseerr:
     container_name: overseerr
+    profiles: [overseerr]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -48,6 +50,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   speedtest:
     container_name: speedtest
+    profiles: [speedtest]
     ports:
       - 8223:8223
     environment:

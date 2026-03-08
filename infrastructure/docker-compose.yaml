@@ -1,6 +1,7 @@
 services:
   portainer-ce:
     container_name: portainer
+    profiles: [portainer]
     ports:
       - 9000:9000
     privileged: false
@@ -20,6 +21,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   watchtower:
     container_name: watchtower
+    profiles: [watchtower]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: always
@@ -29,6 +31,7 @@ services:
     image: containrrr/watchtower
   netdata:
     container_name: netdata
+    profiles: [netdata]
     ports:
       - 19999:19999
     volumes:
@@ -44,6 +47,7 @@ services:
   duckdns:
     image: lscr.io/linuxserver/duckdns:latest
     container_name: duckdns
+    profiles: [duckdns]
     networks:
       - external
     environment:
@@ -60,6 +64,7 @@ services:
       - com.centurylinklabs.watchtower.enable=true
   uptime-kuma:
     restart: always
+    profiles: [uptime-kuma]
     ports:
       - 3001:3001
     networks:
