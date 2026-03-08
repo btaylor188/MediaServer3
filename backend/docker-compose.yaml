@@ -1,4 +1,3 @@
-version: '3.3'
 services:
   nzbget:
     container_name: nzbget
@@ -6,27 +5,29 @@ services:
       - 6789:6789
     environment:
       - LC_ALL=C
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - HOME=/root
       - TERM=xterm
     volumes:
       - /etc/localtime:/etc/localtime
-      - $DOCKERPATH/nzbget:/config
-      - $PROCESSPATH:/mnt/processing
-      - $MEDIAPATH:/mnt/Media
+      - ${DOCKERPATH}/nzbget:/config
+      - ${PROCESSPATH}:/mnt/processing
+      - ${MEDIAPATH}:/mnt/Media
       - /tmp:/tmp
     networks:
       - internal
     restart: always
     image: linuxserver/nzbget:latest
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
   sonarr:
     container_name: sonarr
     ports:
       - 8989:8989
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - HOME=/root
       - TERM=xterm
       - XDG_CONFIG_HOME=/config/xdg
@@ -34,20 +35,22 @@ services:
       - LANG=en_US.UTF-8
     volumes:
       - /etc/localtime:/etc/localtime
-      - $DOCKERPATH/sonarr:/config
-      - $MEDIAPATH:/mnt/Media
-      - $PROCESSPATH:/mnt/processing
+      - ${DOCKERPATH}/sonarr:/config
+      - ${MEDIAPATH}:/mnt/Media
+      - ${PROCESSPATH}:/mnt/processing
     networks:
       - internal
     restart: always
     image: linuxserver/sonarr:latest
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
   radarr:
     container_name: radarr
     ports:
       - 7878:7878
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - HOME=/root
       - TERM=xterm
       - XDG_CONFIG_HOME=/config/xdg
@@ -55,34 +58,38 @@ services:
       - LANG=en_US.UTF-8
     volumes:
       - /etc/localtime:/etc/localtime
-      - $DOCKERPATH/radarr:/config
-      - $MEDIAPATH:/mnt/Media
-      - $PROCESSPATH:/mnt/processing
+      - ${DOCKERPATH}/radarr:/config
+      - ${MEDIAPATH}:/mnt/Media
+      - ${PROCESSPATH}:/mnt/processing
     networks:
       - internal
     restart: always
     image: linuxserver/radarr:latest
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/Denver
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
-      - $DOCKERPATH/prowlarr:/config
+      - ${DOCKERPATH}/prowlarr:/config
     ports:
       - 9696:9696
     networks:
       - internal
     restart: always
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
   bazarr:
     container_name: bazarr
     ports:
       - 6767:6767
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - HOME=/root
       - TERM=xterm
       - XDG_CONFIG_HOME=/config/xdg
@@ -90,27 +97,29 @@ services:
       - LANG=en_US.UTF-8
     volumes:
       - /etc/localtime:/etc/localtime
-      - $DOCKERPATH/bazarr:/config
-      - $MEDIAPATH:/mnt/Media
+      - ${DOCKERPATH}/bazarr:/config
+      - ${MEDIAPATH}:/mnt/Media
     networks:
       - internal
     restart: always
     image: linuxserver/bazarr:latest
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
   tdarr:
     container_name: tdarr_server
     volumes:
-      - $DOCKERPATH/tdarr/server:/app/server
-      - $DOCKERPATH/tdarr/configs:/app/configs
-      - $DOCKERPATH/tdarr/logs:/app/logs
-      - $MEDIAPATH:/media
-      - /temp:/temp
+      - ${DOCKERPATH}/tdarr/server:/app/server
+      - ${DOCKERPATH}/tdarr/configs:/app/configs
+      - ${DOCKERPATH}/tdarr/logs:/app/logs
+      - ${MEDIAPATH}:/media
+      - ${PROCESSPATH}:/temp
     environment:
       - serverIP=0.0.0.0
       - serverPort=8266
       - webUIPort=8265
-      - TZ=America/Denver
-      - PUID=1000
-      - PGID=1000
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
     ports:
       - 8265:8265
       - 8266:8266
@@ -118,47 +127,53 @@ services:
       - internal
     restart: always
     image: haveagitgat/tdarr
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
   tdarr_node:
     container_name: tdarr_node
     volumes:
-      - $DOCKERPATH/tdarr/configs:/app/configs
-      - $DOCKERPATH/tdarr/logs:/app/logs
-      - $MEDIAPATH:/media
-      - /temp:/temp
+      - ${DOCKERPATH}/tdarr/configs:/app/configs
+      - ${DOCKERPATH}/tdarr/logs:/app/logs
+      - ${MEDIAPATH}:/media
+      - ${PROCESSPATH}:/temp
     network_mode: service:tdarr
 #    runtime: nvidia
     environment:
       - nodeID=Node01
       - serverIP=0.0.0.0
       - serverPort=8266
-      - TZ=America/Denver
-      - PUID=1000
-      - PGID=1000
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
 #      - NVIDIA_DRIVER_CAPABILITIES=all
 #      - NVIDIA_VISIBLE_DEVICES=all
     devices:
       - /dev/dri:/dev/dri
     restart: always
     image: haveagitgat/tdarr_node
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
   transmission-openvpn:
     container_name: transmission-w-vpn
     cap_add:
       - NET_ADMIN
     volumes:
-      - $DOCKERPATH/processing:/data
+      - ${DOCKERPATH}/processing:/data
     environment:
       - OPENVPN_PROVIDER=PIA
       - OPENVPN_CONFIG=us_denver
-      - OPENVPN_USERNAME=$PIAUSER
-      - OPENVPN_PASSWORD=$PIAPASS
-      - LOCAL_NETWORK=$LOCALNET
-      - PUID=1000
-      - PGID=1000
+      - OPENVPN_USERNAME=${PIAUSER}
+      - OPENVPN_PASSWORD=${PIAPASS}
+      - LOCAL_NETWORK=${LOCALNET}
+      - PUID=${PUID}
+      - PGID=${PGID}
     networks:
       - internal
     ports:
       - 9091:9091
     image: haugene/transmission-openvpn
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 networks:
   internal:
     external: true

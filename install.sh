@@ -1,112 +1,91 @@
-#! /bin/bash
+#!/bin/bash
+
+set -e
+
+# Remove .env files on exit (success or failure)
+cleanup() {
+    rm -f ./frontend/.env ./backend/.env ./infrastructure/.env
+}
+trap cleanup EXIT
+
 ####### Define Variables ######
 echo "What is the domain name?"
 read DOMAINNAME
 
-echo "Enter path for Docker data.  ie. /mnt/docker"
+echo "Enter path for Docker data (e.g. /mnt/docker):"
 read DOCKERPATH
-sudo mkdir $DOCKERPATH
+sudo mkdir -p "$DOCKERPATH"
 
-echo "Enter path for temp processing.  ie. /mnt/processing"
+echo "Enter path for temp processing (e.g. /mnt/processing):"
 read PROCESSPATH
-sudo mkdir $PROCESSPATH
+sudo mkdir -p "$PROCESSPATH"
 
-echo "Enter path for Plex Media"
-read MEDIAPATH 
-sudo mkdir $MEDIAPATH
+echo "Enter path for Plex Media:"
+read MEDIAPATH
+sudo mkdir -p "$MEDIAPATH"
 
-echo "Enter Claim token from plex.tv/claim"
+echo "Enter Claim token from plex.tv/claim:"
 read PLEXCLAIM
 
-echo "PIA VPN Username"
+echo "PIA VPN Username:"
 read PIAUSER
 
-echo "PIA VPN Password"
-read PIAPASS
+echo "PIA VPN Password:"
+read -s PIAPASS
+echo
 
-echo "Enter Local Network in CIDR Notation"
+echo "Enter Local Network in CIDR Notation (e.g. 192.168.1.0/24):"
 read LOCALNET
 
-echo "DUCKDNS Token"
-read DUCKDNSTOKEN
+echo "DuckDNS Token:"
+read -s DUCKDNSTOKEN
+echo
 
-echo "Nextcloud DB Root Password"
-read NCDBROOT
+echo "Nextcloud DB Root Password:"
+read -s NCDBROOT
+echo
 
-echo "Nextcloud DB User Password"
-read NCDBUSER
+echo "Nextcloud DB User Password:"
+read -s NCDBUSER
+echo
 
+echo "Timezone (e.g. America/Denver):"
+read TZ
 
-export DOMAINNAME=$DOMAINNAME
-export DOCKERPATH=$DOCKERPATH
-export PROCESSPATH=$PROCESSPATH
-export MEDIAPATH=$MEDIAPATH
-export PLEXCLAIM=$PLEXCLAIM
-export PIAUSER=$PIAUSER
-export PIAPASS=$PIAPASS
-export LOCALNET=$LOCALNET
-export DUCKDNSTOKEN=$DUCKDNSTOKEN
-export NCDBROOT=$NCDBROOT
-export NCDBUSER=$NCDBUSER
-
-sudo rm ./frontend/.env
-sudo rm ./backend/.env
-sudo rm ./infrastructure/.env
-cat > ./frontend/.env << EOF1
-DOMAINNAME=$DOMAINNAME
-DOCKERPATH=$DOCKERPATH
-PROCESSPATH=$PROCESSPATH
-MEDIAPATH=$MEDIAPATH
-PLEXCLAIM=$PLEXCLAIM
-PIAUSER=$PIAUSER
-PIAPASS=$PIAPASS
-LOCALNET=$LOCALNET
-DUCKDNSTOKEN=$DUCKDNSTOKEN
-NCDBROOT=$NCDBROOT
-NCDBUSER-$NCDBUSER
-EOF1
-
-cat > ./backend/.env << EOF1
-DOMAINNAME=$DOMAINNAME
-DOCKERPATH=$DOCKERPATH
-PROCESSPATH=$PROCESSPATH
-MEDIAPATH=$MEDIAPATH
-PLEXCLAIM=$PLEXCLAIM
-PIAUSER=$PIAUSER
-PIAPASS=$PIAPASS
-LOCALNET=$LOCALNET
-DUCKDNSTOKEN=$DUCKDNSTOKEN
-EOF1
-
-cat > ./infrastructure/.env << EOF1
-DOMAINNAME=$DOMAINNAME
-DOCKERPATH=$DOCKERPATH
-PROCESSPATH=$PROCESSPATH
-MEDIAPATH=$MEDIAPATH
-PLEXCLAIM=$PLEXCLAIM
-PIAUSER=$PIAUSER
-PIAPASS=$PIAPASS
-LOCALNET=$LOCALNET
-DUCKDNSTOKEN=$DUCKDNSTOKEN
-EOF1
-
+PUID=1000
+PGID=1000
 ###############################
+
+COMMON_ENV="DOMAINNAME=$DOMAINNAME
+DOCKERPATH=$DOCKERPATH
+PROCESSPATH=$PROCESSPATH
+MEDIAPATH=$MEDIAPATH
+PLEXCLAIM=$PLEXCLAIM
+PIAUSER=$PIAUSER
+PIAPASS=$PIAPASS
+LOCALNET=$LOCALNET
+DUCKDNSTOKEN=$DUCKDNSTOKEN
+TZ=$TZ
+PUID=$PUID
+PGID=$PGID"
+
+printf '%s\nNCDBROOT=%s\nNCDBUSER=%s\n' "$COMMON_ENV" "$NCDBROOT" "$NCDBUSER" > ./frontend/.env
+printf '%s\n' "$COMMON_ENV" > ./backend/.env
+printf '%s\n' "$COMMON_ENV" > ./infrastructure/.env
 
 ##########   Docker ###########
-sh ./docker.sh
+bash ./docker.sh
 ###############################
 
-########.Create Docker Networks .#######
-sudo docker network create -d bridge --subnet=172.19.0.0/24 internal 
-sudo docker network create -d bridge --subnet=172.20.0.0/24 external
-###############################
+########  Create Docker Networks  ########
+sudo docker network inspect internal >/dev/null 2>&1 || \
+    sudo docker network create -d bridge --subnet=172.19.0.0/24 internal
+sudo docker network inspect external >/dev/null 2>&1 || \
+    sudo docker network create -d bridge --subnet=172.20.0.0/24 external
+##########################################
 
-
-
-#########.Install Components.####
+#########  Install Components  ###########
 sudo docker compose -f ./infrastructure/docker-compose.yaml up -d
 sudo docker compose -f ./backend/docker-compose.yaml up -d
 sudo docker compose -f ./frontend/docker-compose.yaml up -d
-sudo rm ./frontend/.env
-sudo rm ./backend/.env
-sudo rm ./infrastructure/.env
+##########################################

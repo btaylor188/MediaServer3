@@ -1,40 +1,40 @@
-version: '2'
-
-volumes:
-  nextcloud:
-  db:
-
 services:
-  app:
+  nextcloud:
     image: nextcloud
+    container_name: nextcloud
     restart: always
     ports:
       - 8087:80
-    links:
-      - db
+    depends_on:
+      - nextcloud-db
     volumes:
-      - /opt/docker/nextcloud/html:/var/www/html
-      - /mnt/Storage/NextCloud:/var/www/html/data
+      - ${DOCKERPATH}/nextcloud/html:/var/www/html
+      - ${DOCKERPATH}/nextcloud/data:/var/www/html/data
     environment:
-      - MYSQL_PASSWORD=$NCDBUSER
+      - MYSQL_PASSWORD=${NCDBUSER}
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
-      - MYSQL_HOST=db
+      - MYSQL_HOST=nextcloud-db
     networks:
       - internal
-  db:
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+  nextcloud-db:
     image: mariadb:10.6
+    container_name: nextcloud-db
     restart: always
     command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
     volumes:
-      - /opt/docker/nextcloud/db:/var/lib/mysql
+      - ${DOCKERPATH}/nextcloud/db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=$NCDBROOT
-      - MYSQL_PASSWORD=$NCDBUSER
+      - MYSQL_ROOT_PASSWORD=${NCDBROOT}
+      - MYSQL_PASSWORD=${NCDBUSER}
       - MYSQL_DATABASE=nextcloud
       - MYSQL_USER=nextcloud
     networks:
       - internal
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 
 networks:
   internal:
