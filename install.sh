@@ -11,7 +11,7 @@ trap cleanup EXIT
 # ─────────────────────────────────────────────
 #  Service selection menu
 # ─────────────────────────────────────────────
-SERVICES=(portainer watchtower netdata duckdns uptime-kuma nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr speedtest nextcloud)
+SERVICES=(portainer watchtower netdata duckdns uptime-kuma cloudflared nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr speedtest nextcloud)
 
 LABELS=(
     "Portainer         Docker management UI"
@@ -19,6 +19,7 @@ LABELS=(
     "Netdata           System monitoring"
     "DuckDNS           Dynamic DNS"
     "Uptime Kuma       Uptime monitoring"
+    "Cloudflared       Cloudflare Tunnel (requires connection token)"
     "NZBGet            Usenet downloader"
     "Transmission+VPN  Torrent downloader (requires PIA credentials)"
     "Prowlarr          Indexer manager"
@@ -33,13 +34,13 @@ LABELS=(
 )
 
 GROUPS=(
-    "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
+    "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
     "Backend" "Backend" "Backend" "Backend" "Backend" "Backend" "Backend"
     "Frontend" "Frontend" "Frontend" "Frontend"
 )
 
-# Default: all selected except Nextcloud
-SELECTED=(1 1 1 1 1  1 1 1 1 1 1 1  1 1 1 0)
+# Default: all selected except Cloudflared and Nextcloud
+SELECTED=(1 1 1 1 1 0  1 1 1 1 1 1 1  1 1 1 0)
 
 show_menu() {
     echo ""
@@ -70,8 +71,8 @@ while true; do
     read -rp "  > " input
     case "$input" in
         done) break ;;
-        a) SELECTED=(1 1 1 1 1  1 1 1 1 1 1 1  1 1 1 1) ;;
-        n) SELECTED=(0 0 0 0 0  0 0 0 0 0 0 0  0 0 0 0) ;;
+        a) SELECTED=(1 1 1 1 1 1  1 1 1 1 1 1 1  1 1 1 1) ;;
+        n) SELECTED=(0 0 0 0 0 0  0 0 0 0 0 0 0  0 0 0 0) ;;
         *)
             for num in $input; do
                 if [[ "$num" =~ ^[0-9]+$ ]] && (( num >= 1 && num <= ${#SERVICES[@]} )); then
@@ -150,6 +151,12 @@ if is_selected duckdns; then
     echo
 fi
 
+if is_selected cloudflared; then
+    echo "Cloudflare Tunnel connection token:"
+    read -rs CF_TUNNEL_TOKEN
+    echo
+fi
+
 if is_selected nextcloud; then
     echo "Nextcloud DB root password:"
     read -rs NCDBROOT
@@ -171,6 +178,7 @@ PIAUSER=${PIAUSER:-}
 PIAPASS=${PIAPASS:-}
 LOCALNET=${LOCALNET:-}
 DUCKDNSTOKEN=${DUCKDNSTOKEN:-}
+CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
 TZ=${TZ}
 PUID=${PUID}
 PGID=${PGID}"
@@ -195,7 +203,7 @@ sudo docker network inspect external >/dev/null 2>&1 || \
 # ─────────────────────────────────────────────
 #  Deploy selected services
 # ─────────────────────────────────────────────
-INFRA_ARGS=$(profile_args portainer watchtower netdata duckdns uptime-kuma)
+INFRA_ARGS=$(profile_args portainer watchtower netdata duckdns uptime-kuma cloudflared)
 BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr bazarr tdarr)
 FRONTEND_ARGS=$(profile_args plex overseerr speedtest)
 NEXTCLOUD_ARGS=$(profile_args nextcloud)
