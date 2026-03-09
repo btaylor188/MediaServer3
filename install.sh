@@ -211,6 +211,34 @@ if is_selected qbittorrentvpn; then
         cat > "${DOCKERPATH}/gluetun/custom.conf"
         echo "Config written to ${DOCKERPATH}/gluetun/custom.conf"
     fi
+
+    echo "qBittorrent WebUI password (leave blank to auto-generate):"
+    read -rs QBT_WEBUI_PASSWORD
+    echo
+    if [[ -z "$QBT_WEBUI_PASSWORD" ]]; then
+        QBT_WEBUI_PASSWORD=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 16)
+    fi
+
+    QBT_CONF_DIR="${DOCKERPATH}/qbittorrent/qBittorrent"
+    sudo mkdir -p "$QBT_CONF_DIR"
+    sudo chown "${PUID}:${PGID}" "$QBT_CONF_DIR"
+
+    QBT_HASH=$(QBT_PASS="$QBT_WEBUI_PASSWORD" python3 -c "
+import hashlib, base64, os
+password = os.environ['QBT_PASS']
+salt = os.urandom(16)
+dk = hashlib.pbkdf2_hmac('sha512', password.encode(), salt, 600000)
+print('@ByteArray(PBKDF2-SHA512:600000:{}:{})'.format(base64.b64encode(salt).decode(), base64.b64encode(dk).decode()))
+")
+
+    cat > "${QBT_CONF_DIR}/qBittorrent.conf" <<EOF
+[Preferences]
+WebUI\Address=*
+WebUI\Port=8080
+WebUI\Username=admin
+WebUI\Password_PBKDF2="${QBT_HASH}"
+EOF
+    sudo chown "${PUID}:${PGID}" "${QBT_CONF_DIR}/qBittorrent.conf"
 fi
 
 if is_selected cloudflared; then
@@ -309,9 +337,9 @@ is_selected nzbget       && print_url "NZBGet"         "http://${LOCAL_IP}:6789 
 is_selected transmission    && print_url "Transmission"      "http://${LOCAL_IP}:9091"
 if is_selected qbittorrentvpn; then
     if [[ "${GLUETUN_VPN_TYPE}" == "wireguard" ]]; then
-        print_url "qBittorrent+VPN" "http://${LOCAL_IP}:8080  (place config at ${DOCKERPATH}/gluetun/wireguard/wg0.conf)"
+        print_url "qBittorrent+VPN" "http://${LOCAL_IP}:8080  (admin / ${QBT_WEBUI_PASSWORD} — place WireGuard config at ${DOCKERPATH}/gluetun/wireguard/wg0.conf)"
     else
-        print_url "qBittorrent+VPN" "http://${LOCAL_IP}:8080  (place config at ${DOCKERPATH}/gluetun/custom.conf)"
+        print_url "qBittorrent+VPN" "http://${LOCAL_IP}:8080  (admin / ${QBT_WEBUI_PASSWORD} — OpenVPN config at ${DOCKERPATH}/gluetun/custom.conf)"
     fi
 fi
 is_selected prowlarr     && print_url "Prowlarr"       "http://${LOCAL_IP}:9696"
