@@ -111,23 +111,29 @@ profile_args() {
 echo ""
 echo "── Required Settings ──"
 
-echo "Domain name:"
-read -r DOMAINNAME
-
 echo "Path for Docker data (e.g. /mnt/docker):"
 read -r DOCKERPATH
 sudo mkdir -p "$DOCKERPATH"
 
-echo "Path for temp processing (e.g. /mnt/processing):"
-read -r PROCESSPATH
-sudo mkdir -p "$PROCESSPATH"
-
-echo "Path for media (e.g. /mnt/media):"
-read -r MEDIAPATH
-sudo mkdir -p "$MEDIAPATH"
-
 echo "Timezone (e.g. America/Denver):"
 read -r TZ
+
+if is_selected duckdns || is_selected speedtest; then
+    echo "Domain name:"
+    read -r DOMAINNAME
+fi
+
+if is_selected nzbget || is_selected tdarr; then
+    echo "Path for temp processing (e.g. /mnt/processing):"
+    read -r PROCESSPATH
+    sudo mkdir -p "$PROCESSPATH"
+fi
+
+if is_selected nzbget || is_selected sonarr || is_selected radarr || is_selected tdarr || is_selected plex; then
+    echo "Path for media (e.g. /mnt/media):"
+    read -r MEDIAPATH
+    sudo mkdir -p "$MEDIAPATH"
+fi
 
 PUID=1000
 PGID=1000
