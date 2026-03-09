@@ -41,7 +41,7 @@ services:
     ports:
       - 5055:5055
     volumes:
-      - ${DOCKERPATH}/seerr/config:/config
+      - ${DOCKERPATH}/seerr/config:/app/config
     networks:
       - internal
     restart: unless-stopped
