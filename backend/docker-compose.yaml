@@ -165,7 +165,8 @@ services:
     image: lscr.io/linuxserver/qbittorrent:latest
     network_mode: service:gluetun
     depends_on:
-      - gluetun
+      gluetun:
+        condition: service_healthy
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
