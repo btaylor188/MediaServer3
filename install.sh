@@ -276,7 +276,7 @@ sudo docker network inspect external >/dev/null 2>&1 || \
 # ─────────────────────────────────────────────
 if is_selected sonarr && [[ ! -f "${DOCKERPATH}/sonarr/config.xml" ]]; then
     make_dir "${DOCKERPATH}/sonarr"
-    SONARR_API_KEY=$(openssl rand -hex 16)
+    SONARR_API_KEY=$(tr -dc 'a-f0-9' < /dev/urandom | head -c 32)
     sudo tee "${DOCKERPATH}/sonarr/config.xml" > /dev/null <<EOF
 <Config>
   <BindAddress>*</BindAddress>
@@ -299,7 +299,7 @@ fi
 
 if is_selected radarr && [[ ! -f "${DOCKERPATH}/radarr/config.xml" ]]; then
     make_dir "${DOCKERPATH}/radarr"
-    RADARR_API_KEY=$(openssl rand -hex 16)
+    RADARR_API_KEY=$(tr -dc 'a-f0-9' < /dev/urandom | head -c 32)
     sudo tee "${DOCKERPATH}/radarr/config.xml" > /dev/null <<EOF
 <Config>
   <BindAddress>*</BindAddress>
