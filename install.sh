@@ -21,6 +21,11 @@ ask() {
     fi
 }
 
+make_dir() {
+    sudo mkdir -p "$1"
+    sudo chown "${PUID}:${PGID}" "$1"
+}
+
 save_config() {
     cat > "$CONFIG_FILE" <<EOF
 DOCKERPATH="${DOCKERPATH}"
@@ -139,11 +144,14 @@ profile_args() {
 # ─────────────────────────────────────────────
 #  Collect credentials (only what's needed)
 # ─────────────────────────────────────────────
+PUID=$(id -u)
+PGID=$(id -g)
+
 echo ""
 echo "── Required Settings ──"
 
 ask "Path for Docker data (e.g. /opt/docker)" DOCKERPATH
-sudo mkdir -p "$DOCKERPATH"
+make_dir "$DOCKERPATH"
 
 ask "Timezone (e.g. America/Denver)" TZ
 
@@ -153,18 +161,15 @@ fi
 
 if is_selected nzbget || is_selected tdarr; then
     ask "Path for temp processing (e.g. /opt/processing)" PROCESSPATH
-    sudo mkdir -p "$PROCESSPATH"
+    make_dir "$PROCESSPATH"
 fi
 
 if is_selected nzbget || is_selected sonarr || is_selected radarr || is_selected tdarr || is_selected plex; then
     ask "Path for media (e.g. /mnt/media)" MEDIAPATH
-    sudo mkdir -p "$MEDIAPATH"
+    make_dir "$MEDIAPATH"
 fi
 
 save_config
-
-PUID=1000
-PGID=1000
 
 if is_selected plex; then
     echo "Plex claim token (from plex.tv/claim):"
@@ -192,9 +197,9 @@ if is_selected qbittorrentvpn; then
     read -r GLUETUN_VPN_TYPE
     GLUETUN_VPN_TYPE="${GLUETUN_VPN_TYPE:-wireguard}"
     if [[ "$GLUETUN_VPN_TYPE" == "wireguard" ]]; then
-        sudo mkdir -p "${DOCKERPATH}/gluetun/wireguard"
+        make_dir "${DOCKERPATH}/gluetun/wireguard"
     else
-        sudo mkdir -p "${DOCKERPATH}/gluetun"
+        make_dir "${DOCKERPATH}/gluetun"
     fi
 fi
 
