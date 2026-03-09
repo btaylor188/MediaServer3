@@ -17,6 +17,7 @@ services:
       - OPENVPN_CUSTOM_CONFIG=/gluetun/custom.conf
       - FIREWALL_INPUT_PORTS=8080
     restart: unless-stopped
+
   qbittorrent:
     container_name: qbittorrent
     image: lscr.io/linuxserver/qbittorrent:latest
