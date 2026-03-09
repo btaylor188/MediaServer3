@@ -1,0 +1,24 @@
+services:
+  ocis:
+    image: owncloud/ocis:latest
+    container_name: ocis
+    profiles: [ocis]
+    restart: always
+    ports:
+      - 9200:9200
+    environment:
+      - OCIS_URL=${OCIS_URL}
+      - OCIS_INSECURE=true
+      - OCIS_LOG_LEVEL=info
+    volumes:
+      - ${DOCKERPATH}/ocis/data:/var/lib/ocis
+    networks:
+      - internal
+    logging:
+      driver: local
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+
+networks:
+  internal:
+    external: true

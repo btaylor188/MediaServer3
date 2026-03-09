@@ -11,7 +11,7 @@ trap cleanup EXIT
 # ─────────────────────────────────────────────
 #  Service selection menu
 # ─────────────────────────────────────────────
-SERVICES=(portainer watchtower netdata duckdns uptime-kuma cloudflared nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr speedtest nextcloud)
+SERVICES=(portainer watchtower netdata duckdns uptime-kuma cloudflared nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr speedtest nextcloud ocis)
 
 LABELS=(
     "Portainer         Docker management UI"
@@ -31,16 +31,17 @@ LABELS=(
     "Overseerr         Media requests"
     "Speedtest         Network speed test"
     "Nextcloud         File storage (requires DB credentials)"
+    "oCIS              ownCloud Infinite Scale (requires URL)"
 )
 
 GROUPS=(
     "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
     "Backend" "Backend" "Backend" "Backend" "Backend" "Backend" "Backend"
-    "Frontend" "Frontend" "Frontend" "Frontend"
+    "Frontend" "Frontend" "Frontend" "Frontend" "Frontend"
 )
 
-# Default: all selected except Cloudflared and Nextcloud
-SELECTED=(1 1 1 1 1 0  1 1 1 1 1 1 1  1 1 1 0)
+# Default: all selected except Cloudflared, Nextcloud, and oCIS
+SELECTED=(1 1 1 1 1 0  1 1 1 1 1 1 1  1 1 1 0 0)
 
 show_menu() {
     echo ""
@@ -71,8 +72,8 @@ while true; do
     read -rp "  > " input
     case "$input" in
         done) break ;;
-        a) SELECTED=(1 1 1 1 1 1  1 1 1 1 1 1 1  1 1 1 1) ;;
-        n) SELECTED=(0 0 0 0 0 0  0 0 0 0 0 0 0  0 0 0 0) ;;
+        a) SELECTED=(1 1 1 1 1 1  1 1 1 1 1 1 1  1 1 1 1 1) ;;
+        n) SELECTED=(0 0 0 0 0 0  0 0 0 0 0 0 0  0 0 0 0 0) ;;
         *)
             for num in $input; do
                 if [[ "$num" =~ ^[0-9]+$ ]] && (( num >= 1 && num <= ${#SERVICES[@]} )); then
@@ -166,6 +167,11 @@ if is_selected nextcloud; then
     echo
 fi
 
+if is_selected ocis; then
+    echo "oCIS URL (e.g. https://files.yourdomain.com or https://localhost:9200):"
+    read -r OCIS_URL
+fi
+
 # ─────────────────────────────────────────────
 #  Write .env files
 # ─────────────────────────────────────────────
@@ -179,6 +185,7 @@ PIAPASS=${PIAPASS:-}
 LOCALNET=${LOCALNET:-}
 DUCKDNSTOKEN=${DUCKDNSTOKEN:-}
 CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
+OCIS_URL=${OCIS_URL:-}
 TZ=${TZ}
 PUID=${PUID}
 PGID=${PGID}"
@@ -207,11 +214,13 @@ INFRA_ARGS=$(profile_args portainer watchtower netdata duckdns uptime-kuma cloud
 BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr bazarr tdarr)
 FRONTEND_ARGS=$(profile_args plex overseerr speedtest)
 NEXTCLOUD_ARGS=$(profile_args nextcloud)
+OCIS_ARGS=$(profile_args ocis)
 
 [[ -n "$INFRA_ARGS" ]]     && sudo docker compose -f ./infrastructure/docker-compose.yaml $INFRA_ARGS up -d
 [[ -n "$BACKEND_ARGS" ]]   && sudo docker compose -f ./backend/docker-compose.yaml $BACKEND_ARGS up -d
 [[ -n "$FRONTEND_ARGS" ]]  && sudo docker compose -f ./frontend/docker-compose.yaml $FRONTEND_ARGS up -d
 [[ -n "$NEXTCLOUD_ARGS" ]] && sudo docker compose -f ./frontend/nextcloud.yaml $NEXTCLOUD_ARGS up -d
+[[ -n "$OCIS_ARGS" ]]      && sudo docker compose -f ./frontend/ocis.yaml $OCIS_ARGS up -d
 
 echo ""
 echo "Installation complete!"
