@@ -187,6 +187,8 @@ if is_selected duckdns; then
 fi
 
 if is_selected qbittorrentvpn; then
+    _detected_subnet=$(ip route | awk '/proto kernel/ && /src/ {split($1,a,"."); printf "%s.%s.%s.0/%s\n", a[1],a[2],a[3], substr($1,index($1,"/")+1)}' | head -1)
+    ask "Local subnet for qBittorrent auth bypass (CIDR)" QBIT_SUBNET "${_detected_subnet}"
     ask "VPN type for qBittorrent+VPN (wireguard/openvpn)" GLUETUN_VPN_TYPE "wireguard"
     if [[ "$GLUETUN_VPN_TYPE" == "wireguard" ]]; then
         make_dir "${DOCKERPATH}/gluetun/wireguard"
@@ -231,6 +233,7 @@ DOCKERPATH=${DOCKERPATH}
 PROCESSPATH=${PROCESSPATH}
 MEDIAPATH=${MEDIAPATH}
 PLEXCLAIM=${PLEXCLAIM:-}
+QBIT_SUBNET=${QBIT_SUBNET:-}
 DUCKDNSTOKEN=${DUCKDNSTOKEN:-}
 CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
 GLUETUN_VPN_TYPE=${GLUETUN_VPN_TYPE:-wireguard}
@@ -328,6 +331,19 @@ if is_selected prowlarr && [[ ! -f "${DOCKERPATH}/prowlarr/config.xml" ]]; then
 </Config>
 EOF
     sudo chown "${PUID}:${PGID}" "${DOCKERPATH}/prowlarr/config.xml"
+fi
+
+if is_selected qbittorrentvpn && [[ ! -f "${DOCKERPATH}/qbittorrent/qBittorrent/qBittorrent.conf" ]]; then
+    make_dir "${DOCKERPATH}/qbittorrent/qBittorrent"
+    sudo tee "${DOCKERPATH}/qbittorrent/qBittorrent/qBittorrent.conf" > /dev/null <<EOF
+[BitTorrent]
+Session\DefaultSavePath=/downloads
+
+[Preferences]
+WebUI\AuthSubnetWhitelist=${QBIT_SUBNET}
+WebUI\AuthSubnetWhitelistEnabled=true
+EOF
+    sudo chown -R "${PUID}:${PGID}" "${DOCKERPATH}/qbittorrent"
 fi
 
 # ─────────────────────────────────────────────
