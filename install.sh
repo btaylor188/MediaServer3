@@ -40,7 +40,7 @@ trap cleanup EXIT
 # ─────────────────────────────────────────────
 #  Service selection menu
 # ─────────────────────────────────────────────
-SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission prowlarr sonarr radarr tdarr plex seerr nextcloud ocis)
+SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission qbittorrentvpn prowlarr sonarr radarr tdarr plex seerr nextcloud ocis)
 
 LABELS=(
     "Portainer         Docker management UI"
@@ -52,6 +52,7 @@ LABELS=(
     "Speedtest         Network speed test"
     "NZBGet            Usenet downloader"
     "Transmission+VPN  Torrent downloader (needs PIA)"
+    "qBittorrent+VPN   Torrent client (any VPN provider)"
     "Prowlarr          Indexer manager"
     "Sonarr            TV show automation"
     "Radarr            Movie automation"
@@ -64,14 +65,14 @@ LABELS=(
 
 SVC_GROUPS=(
     "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
-    "Downloaders" "Downloaders"
+    "Downloaders" "Downloaders" "Downloaders"
     "*ARR!" "*ARR!" "*ARR!" "*ARR!"
     "Media Server" "Media Server"
     "Private Cloud" "Private Cloud"
 )
 
 # Default: all selected except Cloudflared, Nextcloud, and oCIS
-SELECTED=(1 1 0 0 0 1 0  1 0  1 1 1 0  1 0  0 0)
+SELECTED=(1 1 0 0 0 1 0  1 0 0  1 1 1 0  1 0  0 0)
 
 show_menu() {
     echo ""
@@ -102,8 +103,8 @@ while true; do
     read -rp "  > " input
     case "$input" in
         go) break ;;
-        a) SELECTED=(1 1 1 1 1 1 1  1 1  1 1 1 1 1  1 1  1 1) ;;
-        n) SELECTED=(0 0 0 0 0 0 0  0 0  0 0 0 0 0  0 0  0 0) ;;
+        a) SELECTED=(1 1 1 1 1 1 1  1 1 1  1 1 1 1  1 1  1 1) ;;
+        n) SELECTED=(0 0 0 0 0 0 0  0 0 0  0 0 0 0  0 0  0 0) ;;
         c) rm -f "$CONFIG_FILE" && echo "  Saved config cleared." ;;
         *)
             for num in $input; do
@@ -245,7 +246,7 @@ sudo docker network inspect external >/dev/null 2>&1 || \
 #  Deploy selected services
 # ─────────────────────────────────────────────
 INFRA_ARGS=$(profile_args portainer wud netdata duckdns uptime-kuma cloudflared speedtest)
-BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr tdarr)
+BACKEND_ARGS=$(profile_args nzbget transmission qbittorrentvpn prowlarr sonarr radarr tdarr)
 FRONTEND_ARGS=$(profile_args plex seerr)
 NEXTCLOUD_ARGS=$(profile_args nextcloud)
 OCIS_ARGS=$(profile_args ocis)
@@ -276,7 +277,8 @@ is_selected netdata      && print_url "Netdata"        "http://${LOCAL_IP}:19999
 is_selected uptime-kuma  && print_url "Uptime Kuma"    "http://${LOCAL_IP}:3001"
 is_selected speedtest    && print_url "Speedtest"      "http://${LOCAL_IP}:8223"
 is_selected nzbget       && print_url "NZBGet"         "http://${LOCAL_IP}:6789  (user: nzbget / pass: tegbzn6789)"
-is_selected transmission && print_url "Transmission"   "http://${LOCAL_IP}:9091"
+is_selected transmission    && print_url "Transmission"      "http://${LOCAL_IP}:9091"
+is_selected qbittorrentvpn && print_url "qBittorrent+VPN"   "http://${LOCAL_IP}:8080  (place WireGuard config in ${DOCKERPATH}/gluetun/wireguard/wg0.conf)"
 is_selected prowlarr     && print_url "Prowlarr"       "http://${LOCAL_IP}:9696"
 is_selected sonarr       && print_url "Sonarr"         "http://${LOCAL_IP}:8989"
 is_selected radarr       && print_url "Radarr"         "http://${LOCAL_IP}:7878"
