@@ -11,7 +11,7 @@ trap cleanup EXIT
 # ─────────────────────────────────────────────
 #  Service selection menu
 # ─────────────────────────────────────────────
-SERVICES=(portainer watchtower netdata duckdns uptime-kuma cloudflared nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr speedtest nextcloud ocis)
+SERVICES=(portainer watchtower netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr nextcloud ocis)
 
 LABELS=(
     "Portainer         Docker management UI"
@@ -20,6 +20,7 @@ LABELS=(
     "DuckDNS           Dynamic DNS"
     "Uptime Kuma       Uptime monitoring"
     "Cloudflared       Cloudflare Tunnel (requires connection token)"
+    "Speedtest         Network speed test"
     "NZBGet            Usenet downloader"
     "Transmission+VPN  Torrent downloader (requires PIA credentials)"
     "Prowlarr          Indexer manager"
@@ -29,19 +30,20 @@ LABELS=(
     "Tdarr             Media transcoding"
     "Plex              Media server"
     "Overseerr         Media requests"
-    "Speedtest         Network speed test"
     "Nextcloud         File storage (requires DB credentials)"
     "oCIS              ownCloud Infinite Scale (requires URL)"
 )
 
 GROUPS=(
-    "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
-    "Backend" "Backend" "Backend" "Backend" "Backend" "Backend" "Backend"
-    "Frontend" "Frontend" "Frontend" "Frontend" "Frontend"
+    "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
+    "Downloaders" "Downloaders"
+    "*ARR!" "*ARR!" "*ARR!" "*ARR!" "*ARR!"
+    "Media Server" "Media Server"
+    "Private Cloud" "Private Cloud"
 )
 
 # Default: all selected except Cloudflared, Nextcloud, and oCIS
-SELECTED=(1 1 1 1 1 0  1 1 1 1 1 1 1  1 1 1 0 0)
+SELECTED=(1 1 1 1 1 0 1  1 1  1 1 1 1 1  1 1  0 0)
 
 show_menu() {
     echo ""
@@ -72,8 +74,8 @@ while true; do
     read -rp "  > " input
     case "$input" in
         done) break ;;
-        a) SELECTED=(1 1 1 1 1 1  1 1 1 1 1 1 1  1 1 1 1 1) ;;
-        n) SELECTED=(0 0 0 0 0 0  0 0 0 0 0 0 0  0 0 0 0 0) ;;
+        a) SELECTED=(1 1 1 1 1 1 1  1 1  1 1 1 1 1  1 1  1 1) ;;
+        n) SELECTED=(0 0 0 0 0 0 0  0 0  0 0 0 0 0  0 0  0 0) ;;
         *)
             for num in $input; do
                 if [[ "$num" =~ ^[0-9]+$ ]] && (( num >= 1 && num <= ${#SERVICES[@]} )); then
@@ -210,9 +212,9 @@ sudo docker network inspect external >/dev/null 2>&1 || \
 # ─────────────────────────────────────────────
 #  Deploy selected services
 # ─────────────────────────────────────────────
-INFRA_ARGS=$(profile_args portainer watchtower netdata duckdns uptime-kuma cloudflared)
+INFRA_ARGS=$(profile_args portainer watchtower netdata duckdns uptime-kuma cloudflared speedtest)
 BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr bazarr tdarr)
-FRONTEND_ARGS=$(profile_args plex overseerr speedtest)
+FRONTEND_ARGS=$(profile_args plex overseerr)
 NEXTCLOUD_ARGS=$(profile_args nextcloud)
 OCIS_ARGS=$(profile_args ocis)
 

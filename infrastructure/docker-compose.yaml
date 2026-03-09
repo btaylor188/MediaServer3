@@ -88,6 +88,24 @@ services:
     image: louislam/uptime-kuma:1
     labels:
       - com.centurylinklabs.watchtower.enable=true
+  speedtest:
+    container_name: speedtest
+    profiles: [speedtest]
+    ports:
+      - 8223:8223
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TITLE=${DOMAINNAME}
+      - WEBPORT=8223
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - internal
+    restart: always
+    image: adolfintel/speedtest
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 networks:
   internal:
     external: true
