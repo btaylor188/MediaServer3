@@ -224,5 +224,38 @@ OCIS_ARGS=$(profile_args ocis)
 [[ -n "$NEXTCLOUD_ARGS" ]] && sudo docker compose -f ./frontend/nextcloud.yaml $NEXTCLOUD_ARGS up -d
 [[ -n "$OCIS_ARGS" ]]      && sudo docker compose -f ./frontend/ocis.yaml $OCIS_ARGS up -d
 
+LOCAL_IP=$(hostname -I | awk '{print $1}')
+
 echo ""
-echo "Installation complete!"
+echo "┌──────────────────────────────────────────────────────────────┐"
+echo "│                  Installation Complete!                      │"
+echo "│                  Installed Services                          │"
+echo "├──────────────────────────────────────────────────────────────┤"
+
+print_url() {
+    local label="$1"
+    local url="$2"
+    printf "│  %-20s %s\n" "$label" "$url"
+}
+
+is_selected portainer    && print_url "Portainer"      "http://${LOCAL_IP}:9000"
+is_selected wud          && print_url "WUD"            "http://${LOCAL_IP}:3000"
+is_selected netdata      && print_url "Netdata"        "http://${LOCAL_IP}:19999"
+is_selected uptime-kuma  && print_url "Uptime Kuma"    "http://${LOCAL_IP}:3001"
+is_selected speedtest    && print_url "Speedtest"      "http://${LOCAL_IP}:8223"
+is_selected nzbget       && print_url "NZBGet"         "http://${LOCAL_IP}:6789"
+is_selected transmission && print_url "Transmission"   "http://${LOCAL_IP}:9091"
+is_selected prowlarr     && print_url "Prowlarr"       "http://${LOCAL_IP}:9696"
+is_selected sonarr       && print_url "Sonarr"         "http://${LOCAL_IP}:8989"
+is_selected radarr       && print_url "Radarr"         "http://${LOCAL_IP}:7878"
+is_selected bazarr       && print_url "Bazarr"         "http://${LOCAL_IP}:6767"
+is_selected tdarr        && print_url "Tdarr"          "http://${LOCAL_IP}:8265"
+is_selected plex         && print_url "Plex"           "http://${LOCAL_IP}:32400/web"
+is_selected overseerr    && print_url "Overseerr"      "http://${LOCAL_IP}:5055"
+is_selected nextcloud    && print_url "Nextcloud"      "http://${LOCAL_IP}:8087"
+is_selected ocis         && print_url "oCIS"           "${OCIS_URL}"
+is_selected duckdns      && print_url "DuckDNS"        "(no UI — managing ${DOMAINNAME}.duckdns.org)"
+is_selected cloudflared  && print_url "Cloudflared"    "(no UI — tunnel active)"
+
+echo "└──────────────────────────────────────────────────────────────┘"
+echo ""
