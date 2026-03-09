@@ -2,6 +2,33 @@
 
 set -e
 
+# ─────────────────────────────────────────────
+#  Saved config (paths and domain name)
+# ─────────────────────────────────────────────
+CONFIG_FILE="${HOME}/.mediaserver3"
+[[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
+
+# Prompt with a saved default — press Enter to keep, or type to override
+ask() {
+    local prompt="$1" varname="$2" current="${!2}"
+    if [[ -n "$current" ]]; then
+        read -r -p "$prompt [$current]: " input
+        [[ -n "$input" ]] && printf -v "$varname" '%s' "$input"
+    else
+        read -r -p "$prompt: " "$varname"
+    fi
+}
+
+save_config() {
+    cat > "$CONFIG_FILE" <<EOF
+DOCKERPATH="${DOCKERPATH}"
+TZ="${TZ}"
+DOMAINNAME="${DOMAINNAME:-}"
+PROCESSPATH="${PROCESSPATH:-}"
+MEDIAPATH="${MEDIAPATH:-}"
+EOF
+}
+
 # Remove .env files on exit (success or failure)
 cleanup() {
     rm -f ./frontend/.env ./backend/.env ./infrastructure/.env
@@ -111,29 +138,26 @@ profile_args() {
 echo ""
 echo "── Required Settings ──"
 
-echo "Path for Docker data (e.g. /mnt/docker):"
-read -r DOCKERPATH
+ask "Path for Docker data (e.g. /mnt/docker)" DOCKERPATH
 sudo mkdir -p "$DOCKERPATH"
 
-echo "Timezone (e.g. America/Denver):"
-read -r TZ
+ask "Timezone (e.g. America/Denver)" TZ
 
 if is_selected duckdns || is_selected speedtest; then
-    echo "Domain name:"
-    read -r DOMAINNAME
+    ask "Domain name" DOMAINNAME
 fi
 
 if is_selected nzbget || is_selected tdarr; then
-    echo "Path for temp processing (e.g. /mnt/processing):"
-    read -r PROCESSPATH
+    ask "Path for temp processing (e.g. /mnt/processing)" PROCESSPATH
     sudo mkdir -p "$PROCESSPATH"
 fi
 
 if is_selected nzbget || is_selected sonarr || is_selected radarr || is_selected tdarr || is_selected plex; then
-    echo "Path for media (e.g. /mnt/media):"
-    read -r MEDIAPATH
+    ask "Path for media (e.g. /mnt/media)" MEDIAPATH
     sudo mkdir -p "$MEDIAPATH"
 fi
+
+save_config
 
 PUID=1000
 PGID=1000
