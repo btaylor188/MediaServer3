@@ -163,7 +163,7 @@ if is_selected duckdns || is_selected speedtest; then
     ask "Domain name" DOMAINNAME
 fi
 
-if is_selected nzbget || is_selected tdarr || is_selected qbittorrentvpn; then
+if is_selected nzbget || is_selected sonarr || is_selected radarr || is_selected tdarr || is_selected qbittorrentvpn; then
     ask "Path for temp processing" PROCESSPATH "/opt/processing"
     make_dir "$PROCESSPATH"
 fi
@@ -270,6 +270,55 @@ sudo docker network inspect internal >/dev/null 2>&1 || \
     sudo docker network create -d bridge --subnet=172.19.0.0/24 internal
 sudo docker network inspect external >/dev/null 2>&1 || \
     sudo docker network create -d bridge --subnet=172.20.0.0/24 external
+
+# ─────────────────────────────────────────────
+#  Pre-configure services
+# ─────────────────────────────────────────────
+if is_selected sonarr && [[ ! -f "${DOCKERPATH}/sonarr/config.xml" ]]; then
+    make_dir "${DOCKERPATH}/sonarr"
+    SONARR_API_KEY=$(openssl rand -hex 16)
+    sudo tee "${DOCKERPATH}/sonarr/config.xml" > /dev/null <<EOF
+<Config>
+  <BindAddress>*</BindAddress>
+  <Port>8989</Port>
+  <SslPort>9898</SslPort>
+  <EnableSsl>False</EnableSsl>
+  <LaunchBrowser>True</LaunchBrowser>
+  <ApiKey>${SONARR_API_KEY}</ApiKey>
+  <AuthenticationMethod>External</AuthenticationMethod>
+  <Branch>main</Branch>
+  <LogLevel>info</LogLevel>
+  <UrlBase></UrlBase>
+  <UpdateMechanism>Docker</UpdateMechanism>
+  <AnalyticsEnabled>True</AnalyticsEnabled>
+  <InstanceName>Sonarr</InstanceName>
+</Config>
+EOF
+    sudo chown "${PUID}:${PGID}" "${DOCKERPATH}/sonarr/config.xml"
+fi
+
+if is_selected radarr && [[ ! -f "${DOCKERPATH}/radarr/config.xml" ]]; then
+    make_dir "${DOCKERPATH}/radarr"
+    RADARR_API_KEY=$(openssl rand -hex 16)
+    sudo tee "${DOCKERPATH}/radarr/config.xml" > /dev/null <<EOF
+<Config>
+  <BindAddress>*</BindAddress>
+  <Port>7878</Port>
+  <SslPort>7879</SslPort>
+  <EnableSsl>False</EnableSsl>
+  <LaunchBrowser>True</LaunchBrowser>
+  <ApiKey>${RADARR_API_KEY}</ApiKey>
+  <AuthenticationMethod>External</AuthenticationMethod>
+  <Branch>master</Branch>
+  <LogLevel>info</LogLevel>
+  <UrlBase></UrlBase>
+  <UpdateMechanism>Docker</UpdateMechanism>
+  <AnalyticsEnabled>True</AnalyticsEnabled>
+  <InstanceName>Radarr</InstanceName>
+</Config>
+EOF
+    sudo chown "${PUID}:${PGID}" "${DOCKERPATH}/radarr/config.xml"
+fi
 
 # ─────────────────────────────────────────────
 #  Deploy selected services
