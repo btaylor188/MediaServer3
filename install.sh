@@ -202,6 +202,11 @@ if is_selected qbittorrentvpn; then
         make_dir "${DOCKERPATH}/gluetun/wireguard"
     else
         make_dir "${DOCKERPATH}/gluetun"
+        echo "OpenVPN username:"
+        read -r OPENVPN_USER
+        echo "OpenVPN password:"
+        read -rs OPENVPN_PASSWORD
+        echo
     fi
 fi
 
@@ -239,6 +244,8 @@ LOCALNET=${LOCALNET:-}
 DUCKDNSTOKEN=${DUCKDNSTOKEN:-}
 CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
 GLUETUN_VPN_TYPE=${GLUETUN_VPN_TYPE:-wireguard}
+OPENVPN_USER=${OPENVPN_USER:-}
+OPENVPN_PASSWORD=${OPENVPN_PASSWORD:-}
 OCIS_URL=${OCIS_URL:-}
 TZ=${TZ}
 PUID=${PUID}

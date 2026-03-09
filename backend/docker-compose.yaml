@@ -153,6 +153,8 @@ services:
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=${GLUETUN_VPN_TYPE}
       - OPENVPN_CUSTOM_CONFIG=/gluetun/custom.conf
+      - OPENVPN_USER=${OPENVPN_USER:-}
+      - OPENVPN_PASSWORD=${OPENVPN_PASSWORD:-}
       - FIREWALL_INPUT_PORTS=8080
     networks:
       - internal
