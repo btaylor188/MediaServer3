@@ -6,11 +6,18 @@ services:
     restart: always
     ports:
       - 9200:9200
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        ocis init --insecure true || true
+        ocis server
     environment:
       - OCIS_URL=${OCIS_URL}
       - OCIS_INSECURE=true
       - OCIS_LOG_LEVEL=info
     volumes:
+      - ${DOCKERPATH}/ocis/config:/etc/ocis
       - ${DOCKERPATH}/ocis/data:/var/lib/ocis
     networks:
       - internal

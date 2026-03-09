@@ -223,6 +223,8 @@ fi
 if is_selected ocis; then
     echo "oCIS URL (e.g. https://files.yourdomain.com or https://localhost:9200):"
     read -r OCIS_URL
+    make_dir "${DOCKERPATH}/ocis/config"
+    make_dir "${DOCKERPATH}/ocis/data"
 fi
 
 # ─────────────────────────────────────────────
