@@ -43,7 +43,7 @@ SVC_GROUPS=(
 )
 
 # Default: all selected except Cloudflared, Nextcloud, and oCIS
-SELECTED=(1 1 1 1 1 0 1  1 1  1 1 1 1 1  1 1  0 0)
+SELECTED=(1 1 0 0 0 1 0  1 0  1 1 1 1 1  1 0  0 0)
 
 show_menu() {
     echo ""
