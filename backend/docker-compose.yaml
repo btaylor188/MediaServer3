@@ -151,7 +151,7 @@ services:
       - ${DOCKERPATH}/gluetun:/gluetun
     environment:
       - VPN_SERVICE_PROVIDER=custom
-      - VPN_TYPE=wireguard
+      - VPN_TYPE=${GLUETUN_VPN_TYPE}
     networks:
       - internal
     restart: unless-stopped

@@ -187,6 +187,17 @@ if is_selected duckdns; then
     echo
 fi
 
+if is_selected qbittorrentvpn; then
+    echo "VPN type for qBittorrent+VPN (wireguard/openvpn) [wireguard]:"
+    read -r GLUETUN_VPN_TYPE
+    GLUETUN_VPN_TYPE="${GLUETUN_VPN_TYPE:-wireguard}"
+    if [[ "$GLUETUN_VPN_TYPE" == "wireguard" ]]; then
+        sudo mkdir -p "${DOCKERPATH}/gluetun/wireguard"
+    else
+        sudo mkdir -p "${DOCKERPATH}/gluetun"
+    fi
+fi
+
 if is_selected cloudflared; then
     echo "Cloudflare Tunnel connection token:"
     read -rs CF_TUNNEL_TOKEN
@@ -220,6 +231,7 @@ PIAPASS=${PIAPASS:-}
 LOCALNET=${LOCALNET:-}
 DUCKDNSTOKEN=${DUCKDNSTOKEN:-}
 CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
+GLUETUN_VPN_TYPE=${GLUETUN_VPN_TYPE:-wireguard}
 OCIS_URL=${OCIS_URL:-}
 TZ=${TZ}
 PUID=${PUID}
@@ -278,7 +290,13 @@ is_selected uptime-kuma  && print_url "Uptime Kuma"    "http://${LOCAL_IP}:3001"
 is_selected speedtest    && print_url "Speedtest"      "http://${LOCAL_IP}:8223"
 is_selected nzbget       && print_url "NZBGet"         "http://${LOCAL_IP}:6789  (user: nzbget / pass: tegbzn6789)"
 is_selected transmission    && print_url "Transmission"      "http://${LOCAL_IP}:9091"
-is_selected qbittorrentvpn && print_url "qBittorrent+VPN"   "http://${LOCAL_IP}:8080  (place WireGuard config in ${DOCKERPATH}/gluetun/wireguard/wg0.conf)"
+if is_selected qbittorrentvpn; then
+    if [[ "${GLUETUN_VPN_TYPE}" == "wireguard" ]]; then
+        print_url "qBittorrent+VPN" "http://${LOCAL_IP}:8080  (place config at ${DOCKERPATH}/gluetun/wireguard/wg0.conf)"
+    else
+        print_url "qBittorrent+VPN" "http://${LOCAL_IP}:8080  (place config at ${DOCKERPATH}/gluetun/custom.conf)"
+    fi
+fi
 is_selected prowlarr     && print_url "Prowlarr"       "http://${LOCAL_IP}:9696"
 is_selected sonarr       && print_url "Sonarr"         "http://${LOCAL_IP}:8989"
 is_selected radarr       && print_url "Radarr"         "http://${LOCAL_IP}:7878"
