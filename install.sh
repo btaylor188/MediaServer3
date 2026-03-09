@@ -42,6 +42,15 @@ GROUPS=(
     "Private Cloud" "Private Cloud"
 )
 
+# Shortcut letter for each group (used to toggle all services in a category)
+declare -A GROUP_KEYS=(
+    ["Infrastructure"]="i"
+    ["Downloaders"]="d"
+    ["*ARR!"]="r"
+    ["Media Server"]="m"
+    ["Private Cloud"]="p"
+)
+
 # Default: all selected except Cloudflared, Nextcloud, and oCIS
 SELECTED=(1 1 1 1 1 0 1  1 1  1 1 1 1 1  1 1  0 0)
 
@@ -54,8 +63,9 @@ show_menu() {
     for i in "${!SERVICES[@]}"; do
         local group="${GROUPS[$i]}"
         if [[ "$group" != "$last_group" ]]; then
+            local key="${GROUP_KEYS[$group]}"
             printf "│                                                              │\n"
-            printf "│  ── %-52s  │\n" "$group"
+            printf "│  ── %-44s [%s] toggle all  │\n" "$group" "$key"
             last_group="$group"
         fi
         local mark="[ ]"
@@ -66,7 +76,7 @@ show_menu() {
     echo "└──────────────────────────────────────────────────────────────┘"
     echo ""
     echo "  Enter number(s) to toggle (e.g. '3' or '1 4 7')"
-    echo "  'a' = select all  |  'n' = deselect all  |  'done' = confirm"
+    echo "  i/d/r/m/p = toggle category  |  'a' = all  |  'n' = none  |  'done' = confirm"
 }
 
 while true; do
@@ -76,6 +86,22 @@ while true; do
         done) break ;;
         a) SELECTED=(1 1 1 1 1 1 1  1 1  1 1 1 1 1  1 1  1 1) ;;
         n) SELECTED=(0 0 0 0 0 0 0  0 0  0 0 0 0 0  0 0  0 0) ;;
+        i|d|r|m|p)
+            # Find which group name maps to this key
+            target_group=""
+            for g in "${!GROUP_KEYS[@]}"; do
+                [[ "${GROUP_KEYS[$g]}" == "$input" ]] && target_group="$g" && break
+            done
+            # Determine current state: if all in group are selected, deselect; else select all
+            all_on=1
+            for i in "${!SERVICES[@]}"; do
+                [[ "${GROUPS[$i]}" == "$target_group" && "${SELECTED[$i]}" == "0" ]] && all_on=0 && break
+            done
+            new_val=$(( 1 - all_on ))
+            for i in "${!SERVICES[@]}"; do
+                [[ "${GROUPS[$i]}" == "$target_group" ]] && SELECTED[$i]=$new_val
+            done
+            ;;
         *)
             for num in $input; do
                 if [[ "$num" =~ ^[0-9]+$ ]] && (( num >= 1 && num <= ${#SERVICES[@]} )); then
