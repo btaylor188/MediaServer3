@@ -87,29 +87,6 @@ services:
     restart: always
     labels:
       - wud.watch=true
-  bazarr:
-    container_name: bazarr
-    profiles: [bazarr]
-    ports:
-      - 6767:6767
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - HOME=/root
-      - TERM=xterm
-      - XDG_CONFIG_HOME=/config/xdg
-      - LANGUAGE=en_US.UTF-8
-      - LANG=en_US.UTF-8
-    volumes:
-      - /etc/localtime:/etc/localtime
-      - ${DOCKERPATH}/bazarr:/config
-      - ${MEDIAPATH}:/mnt/Media
-    networks:
-      - internal
-    restart: always
-    image: linuxserver/bazarr:latest
-    labels:
-      - wud.watch=true
   tdarr:
     container_name: tdarr_server
     profiles: [tdarr]

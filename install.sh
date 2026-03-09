@@ -11,7 +11,7 @@ trap cleanup EXIT
 # ─────────────────────────────────────────────
 #  Service selection menu
 # ─────────────────────────────────────────────
-SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr nextcloud ocis)
+SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission prowlarr sonarr radarr tdarr plex overseerr nextcloud ocis)
 
 LABELS=(
     "Portainer         Docker management UI"
@@ -26,7 +26,6 @@ LABELS=(
     "Prowlarr          Indexer manager"
     "Sonarr            TV show automation"
     "Radarr            Movie automation"
-    "Bazarr            Subtitle automation"
     "Tdarr             Media transcoding"
     "Plex              Media server"
     "Overseerr         Media requests"
@@ -37,13 +36,13 @@ LABELS=(
 SVC_GROUPS=(
     "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
     "Downloaders" "Downloaders"
-    "*ARR!" "*ARR!" "*ARR!" "*ARR!" "*ARR!"
+    "*ARR!" "*ARR!" "*ARR!" "*ARR!"
     "Media Server" "Media Server"
     "Private Cloud" "Private Cloud"
 )
 
 # Default: all selected except Cloudflared, Nextcloud, and oCIS
-SELECTED=(1 1 0 0 0 1 0  1 0  1 1 1 1 0  1 0  0 0)
+SELECTED=(1 1 0 0 0 1 0  1 0  1 1 1 0  1 0  0 0)
 
 show_menu() {
     echo ""
@@ -213,7 +212,7 @@ sudo docker network inspect external >/dev/null 2>&1 || \
 #  Deploy selected services
 # ─────────────────────────────────────────────
 INFRA_ARGS=$(profile_args portainer wud netdata duckdns uptime-kuma cloudflared speedtest)
-BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr bazarr tdarr)
+BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr tdarr)
 FRONTEND_ARGS=$(profile_args plex overseerr)
 NEXTCLOUD_ARGS=$(profile_args nextcloud)
 OCIS_ARGS=$(profile_args ocis)
@@ -248,7 +247,6 @@ is_selected transmission && print_url "Transmission"   "http://${LOCAL_IP}:9091"
 is_selected prowlarr     && print_url "Prowlarr"       "http://${LOCAL_IP}:9696"
 is_selected sonarr       && print_url "Sonarr"         "http://${LOCAL_IP}:8989"
 is_selected radarr       && print_url "Radarr"         "http://${LOCAL_IP}:7878"
-is_selected bazarr       && print_url "Bazarr"         "http://${LOCAL_IP}:6767"
 is_selected tdarr        && print_url "Tdarr"          "http://${LOCAL_IP}:8265"
 is_selected plex         && print_url "Plex"           "http://${LOCAL_IP}:32400/web"
 is_selected overseerr    && print_url "Overseerr"      "http://${LOCAL_IP}:5055"
