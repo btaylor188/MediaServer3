@@ -33,6 +33,7 @@ TZ="${TZ}"
 DOMAINNAME="${DOMAINNAME:-}"
 PROCESSPATH="${PROCESSPATH:-}"
 MEDIAPATH="${MEDIAPATH:-}"
+GLUETUN_VPN_TYPE="${GLUETUN_VPN_TYPE:-wireguard}"
 EOF
 }
 
@@ -193,9 +194,8 @@ if is_selected duckdns; then
 fi
 
 if is_selected qbittorrentvpn; then
-    echo "VPN type for qBittorrent+VPN (wireguard/openvpn) [wireguard]:"
-    read -r GLUETUN_VPN_TYPE
     GLUETUN_VPN_TYPE="${GLUETUN_VPN_TYPE:-wireguard}"
+    ask "VPN type for qBittorrent+VPN (wireguard/openvpn)" GLUETUN_VPN_TYPE
     if [[ "$GLUETUN_VPN_TYPE" == "wireguard" ]]; then
         make_dir "${DOCKERPATH}/gluetun/wireguard"
     else
