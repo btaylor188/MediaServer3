@@ -1,0 +1,12 @@
+version: '3.3'
+services:
+    wud:
+        container_name: wud
+        image: getwud/wud
+        ports:
+            - 3000:3000
+        volumes:
+            - '/var/run/docker.sock:/var/run/docker.sock'
+        restart: unless-stopped
+        environment:
+            - WUD_WATCHER_LOCAL_CRON=0 0 * * *

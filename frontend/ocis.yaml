@@ -17,7 +17,7 @@ services:
     logging:
       driver: local
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
 
 networks:
   internal:

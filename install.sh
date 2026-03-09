@@ -11,11 +11,11 @@ trap cleanup EXIT
 # ─────────────────────────────────────────────
 #  Service selection menu
 # ─────────────────────────────────────────────
-SERVICES=(portainer watchtower netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr nextcloud ocis)
+SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission prowlarr sonarr radarr bazarr tdarr plex overseerr nextcloud ocis)
 
 LABELS=(
     "Portainer         Docker management UI"
-    "Watchtower        Automatic container updates"
+    "WUD               Container update notifications"
     "Netdata           System monitoring"
     "DuckDNS           Dynamic DNS"
     "Uptime Kuma       Uptime monitoring"
@@ -212,7 +212,7 @@ sudo docker network inspect external >/dev/null 2>&1 || \
 # ─────────────────────────────────────────────
 #  Deploy selected services
 # ─────────────────────────────────────────────
-INFRA_ARGS=$(profile_args portainer watchtower netdata duckdns uptime-kuma cloudflared speedtest)
+INFRA_ARGS=$(profile_args portainer wud netdata duckdns uptime-kuma cloudflared speedtest)
 BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr bazarr tdarr)
 FRONTEND_ARGS=$(profile_args plex overseerr)
 NEXTCLOUD_ARGS=$(profile_args nextcloud)

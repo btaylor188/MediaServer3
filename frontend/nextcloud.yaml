@@ -19,7 +19,7 @@ services:
     networks:
       - internal
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   nextcloud-db:
     image: mariadb:10.6
     container_name: nextcloud-db
@@ -36,7 +36,7 @@ services:
     networks:
       - internal
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
 
 networks:
   internal:

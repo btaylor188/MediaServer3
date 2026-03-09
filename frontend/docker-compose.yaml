@@ -30,7 +30,7 @@ services:
     restart: always
     image: plexinc/pms-docker
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   overseerr:
     container_name: overseerr
     profiles: [overseerr]
@@ -47,7 +47,7 @@ services:
     restart: unless-stopped
     image: linuxserver/overseerr
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
 networks:
   internal:
     external: true

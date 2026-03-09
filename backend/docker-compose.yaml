@@ -21,7 +21,7 @@ services:
     restart: always
     image: linuxserver/nzbget:latest
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   sonarr:
     container_name: sonarr
     profiles: [sonarr]
@@ -45,7 +45,7 @@ services:
     restart: always
     image: linuxserver/sonarr:latest
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   radarr:
     container_name: radarr
     profiles: [radarr]
@@ -69,7 +69,7 @@ services:
     restart: always
     image: linuxserver/radarr:latest
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
@@ -86,7 +86,7 @@ services:
       - internal
     restart: always
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   bazarr:
     container_name: bazarr
     profiles: [bazarr]
@@ -109,7 +109,7 @@ services:
     restart: always
     image: linuxserver/bazarr:latest
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   tdarr:
     container_name: tdarr_server
     profiles: [tdarr]
@@ -134,7 +134,7 @@ services:
     restart: always
     image: haveagitgat/tdarr
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   tdarr_node:
     container_name: tdarr_node
     profiles: [tdarr]
@@ -159,7 +159,7 @@ services:
     restart: always
     image: haveagitgat/tdarr_node
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   transmission-openvpn:
     container_name: transmission-w-vpn
     profiles: [transmission]
@@ -181,7 +181,7 @@ services:
       - 9091:9091
     image: haugene/transmission-openvpn
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
 networks:
   internal:
     external: true

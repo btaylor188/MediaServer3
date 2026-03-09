@@ -18,17 +18,21 @@ services:
     restart: always
     image: portainer/portainer-ce
     labels:
-      - com.centurylinklabs.watchtower.enable=true
-  watchtower:
-    container_name: watchtower
-    profiles: [watchtower]
+      - wud.watch=true
+  wud:
+    container_name: wud
+    profiles: [wud]
+    image: getwud/wud
+    ports:
+      - 3000:3000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    restart: always
+      - ${DOCKERPATH}/wud:/store
+    networks:
+      - internal
+    restart: unless-stopped
     environment:
-      - WATCHTOWER_POLL_INTERVAL=86400
-      - WATCHTOWER_LABEL_ENABLE=true
-    image: containrrr/watchtower
+      - WUD_WATCHER_LOCAL_CRON=0 0 * * *
   netdata:
     container_name: netdata
     profiles: [netdata]
@@ -43,7 +47,7 @@ services:
     restart: always
     image: titpetric/netdata
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   duckdns:
     image: lscr.io/linuxserver/duckdns:latest
     container_name: duckdns
@@ -61,7 +65,7 @@ services:
       - ${DOCKERPATH}/duckdns:/config
     restart: unless-stopped
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared
@@ -73,7 +77,7 @@ services:
     networks:
       - external
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   uptime-kuma:
     restart: always
     profiles: [uptime-kuma]
@@ -87,7 +91,7 @@ services:
     container_name: uptime-kuma
     image: louislam/uptime-kuma:1
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
   speedtest:
     container_name: speedtest
     profiles: [speedtest]
@@ -105,7 +109,7 @@ services:
     restart: always
     image: adolfintel/speedtest
     labels:
-      - com.centurylinklabs.watchtower.enable=true
+      - wud.watch=true
 networks:
   internal:
     external: true
