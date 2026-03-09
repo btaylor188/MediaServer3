@@ -142,7 +142,7 @@ profile_args() {
 echo ""
 echo "── Required Settings ──"
 
-ask "Path for Docker data (e.g. /mnt/docker)" DOCKERPATH
+ask "Path for Docker data (e.g. /opt/docker)" DOCKERPATH
 sudo mkdir -p "$DOCKERPATH"
 
 ask "Timezone (e.g. America/Denver)" TZ
@@ -152,7 +152,7 @@ if is_selected duckdns || is_selected speedtest; then
 fi
 
 if is_selected nzbget || is_selected tdarr; then
-    ask "Path for temp processing (e.g. /mnt/processing)" PROCESSPATH
+    ask "Path for temp processing (e.g. /opt/processing)" PROCESSPATH
     sudo mkdir -p "$PROCESSPATH"
 fi
 
