@@ -19,10 +19,10 @@ LABELS=(
     "Netdata           System monitoring"
     "DuckDNS           Dynamic DNS"
     "Uptime Kuma       Uptime monitoring"
-    "Cloudflared       Cloudflare Tunnel (requires connection token)"
+    "Cloudflared       Cloudflare Tunnel (needs token)"
     "Speedtest         Network speed test"
     "NZBGet            Usenet downloader"
-    "Transmission+VPN  Torrent downloader (requires PIA credentials)"
+    "Transmission+VPN  Torrent downloader (needs PIA)"
     "Prowlarr          Indexer manager"
     "Sonarr            TV show automation"
     "Radarr            Movie automation"
@@ -30,8 +30,8 @@ LABELS=(
     "Tdarr             Media transcoding"
     "Plex              Media server"
     "Overseerr         Media requests"
-    "Nextcloud         File storage (requires DB credentials)"
-    "oCIS              ownCloud Infinite Scale (requires URL)"
+    "Nextcloud         File storage (needs DB creds)"
+    "oCIS              ownCloud Infinite Scale (URL)"
 )
 
 SVC_GROUPS=(
