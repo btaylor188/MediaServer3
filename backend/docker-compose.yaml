@@ -152,6 +152,7 @@ services:
     environment:
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=${GLUETUN_VPN_TYPE}
+      - OPENVPN_CUSTOM_CONFIG=/gluetun/custom.conf
     networks:
       - internal
     restart: unless-stopped
