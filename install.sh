@@ -55,12 +55,12 @@ show_menu() {
         local group="${SVC_GROUPS[$i]}"
         if [[ "$group" != "$last_group" ]]; then
             printf "│                                                              │\n"
-            printf "│  ── %-52s  │\n" "$group"
+            printf "│  ── %-55s  │\n" "$group"
             last_group="$group"
         fi
         local mark="[ ]"
         [[ "${SELECTED[$i]}" == "1" ]] && mark="[x]"
-        printf "│  %2d) %s  %-47s │\n" "$((i+1))" "$mark" "${LABELS[$i]}"
+        printf "│  %2d) %s  %-50s │\n" "$((i+1))" "$mark" "${LABELS[$i]}"
     done
     echo "│                                                              │"
     echo "└──────────────────────────────────────────────────────────────┘"
