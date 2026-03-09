@@ -11,7 +11,7 @@ trap cleanup EXIT
 # ─────────────────────────────────────────────
 #  Service selection menu
 # ─────────────────────────────────────────────
-SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission prowlarr sonarr radarr tdarr plex overseerr nextcloud ocis)
+SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget transmission prowlarr sonarr radarr tdarr plex seerr nextcloud ocis)
 
 LABELS=(
     "Portainer         Docker management UI"
@@ -28,7 +28,7 @@ LABELS=(
     "Radarr            Movie automation"
     "Tdarr             Media transcoding"
     "Plex              Media server"
-    "Overseerr         Media requests"
+    "Seerr             Media requests"
     "Nextcloud         File storage (needs DB creds)"
     "oCIS              ownCloud Infinite Scale (URL)"
 )
@@ -213,7 +213,7 @@ sudo docker network inspect external >/dev/null 2>&1 || \
 # ─────────────────────────────────────────────
 INFRA_ARGS=$(profile_args portainer wud netdata duckdns uptime-kuma cloudflared speedtest)
 BACKEND_ARGS=$(profile_args nzbget transmission prowlarr sonarr radarr tdarr)
-FRONTEND_ARGS=$(profile_args plex overseerr)
+FRONTEND_ARGS=$(profile_args plex seerr)
 NEXTCLOUD_ARGS=$(profile_args nextcloud)
 OCIS_ARGS=$(profile_args ocis)
 
@@ -249,7 +249,7 @@ is_selected sonarr       && print_url "Sonarr"         "http://${LOCAL_IP}:8989"
 is_selected radarr       && print_url "Radarr"         "http://${LOCAL_IP}:7878"
 is_selected tdarr        && print_url "Tdarr"          "http://${LOCAL_IP}:8265"
 is_selected plex         && print_url "Plex"           "http://${LOCAL_IP}:32400/web"
-is_selected overseerr    && print_url "Overseerr"      "http://${LOCAL_IP}:5055"
+is_selected seerr        && print_url "Seerr"           "http://${LOCAL_IP}:5055"
 is_selected nextcloud    && print_url "Nextcloud"      "http://${LOCAL_IP}:8087"
 is_selected ocis         && print_url "oCIS"           "${OCIS_URL}"
 is_selected duckdns      && print_url "DuckDNS"        "(no UI — managing ${DOMAINNAME}.duckdns.org)"

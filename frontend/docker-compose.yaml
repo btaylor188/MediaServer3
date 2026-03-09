@@ -31,9 +31,9 @@ services:
     image: plexinc/pms-docker
     labels:
       - wud.watch=true
-  overseerr:
-    container_name: overseerr
-    profiles: [overseerr]
+  seerr:
+    container_name: seerr
+    profiles: [seerr]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -41,11 +41,11 @@ services:
     ports:
       - 5055:5055
     volumes:
-      - ${DOCKERPATH}/overseerr/config:/config
+      - ${DOCKERPATH}/seerr/config:/config
     networks:
       - internal
     restart: unless-stopped
-    image: linuxserver/overseerr
+    image: ghcr.io/seerr-team/seerr:latest
     labels:
       - wud.watch=true
 networks:

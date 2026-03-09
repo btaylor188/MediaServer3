@@ -1,7 +1,7 @@
 version: '3.3'
 services:
-    overseerr:
-        container_name: overseerr
+    seerr:
+        container_name: seerr
         environment:
             - PUID=1000
             - PGID=1000
@@ -9,9 +9,9 @@ services:
         ports:
             - 5055:5055
         volumes:
-            - $DOCKERPATH/overseerr/config:/config
+            - $DOCKERPATH/seerr/config:/config
         restart: unless-stopped
-        image: linuxserver/overseerr
+        image: ghcr.io/seerr-team/seerr:latest
 networks:
   internal:
     external: true

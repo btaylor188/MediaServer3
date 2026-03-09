@@ -45,7 +45,7 @@ services:
     networks:
       - internal
     restart: always
-    image: titpetric/netdata
+    image: netdata/netdata
     labels:
       - wud.watch=true
   duckdns:

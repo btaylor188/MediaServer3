@@ -11,7 +11,7 @@ services:
         networks:
           - internal
         restart: always
-        image: titpetric/netdata
+        image: netdata/netdata
 networks:
   internal:
     external: true
