@@ -207,6 +207,9 @@ if is_selected qbittorrentvpn; then
         echo "OpenVPN password:"
         read -rs OPENVPN_PASSWORD
         echo
+        echo "Paste your OpenVPN config file contents, then press Ctrl+D on a new line:"
+        cat > "${DOCKERPATH}/gluetun/custom.conf"
+        echo "Config written to ${DOCKERPATH}/gluetun/custom.conf"
     fi
 fi
 
