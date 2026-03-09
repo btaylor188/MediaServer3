@@ -13,7 +13,9 @@ ask() {
     local prompt="$1" varname="$2" current="${!2}"
     if [[ -n "$current" ]]; then
         read -r -p "$prompt [$current]: " input
-        [[ -n "$input" ]] && printf -v "$varname" '%s' "$input"
+        if [[ -n "$input" ]]; then
+            printf -v "$varname" '%s' "$input"
+        fi
     else
         read -r -p "$prompt: " "$varname"
     fi
