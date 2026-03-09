@@ -92,14 +92,14 @@ show_menu() {
     echo "└──────────────────────────────────────────────────────────────┘"
     echo ""
     echo "  Enter number(s) to toggle (e.g. '3' or '1 4 7')"
-    echo "  'a' = select all  |  'n' = deselect all  |  'c' = clear saved config  |  'done' = confirm"
+    echo "  'a' = select all  |  'n' = deselect all  |  'c' = clear saved config  |  'go' = confirm"
 }
 
 while true; do
     show_menu
     read -rp "  > " input
     case "$input" in
-        done) break ;;
+        go) break ;;
         a) SELECTED=(1 1 1 1 1 1 1  1 1  1 1 1 1 1  1 1  1 1) ;;
         n) SELECTED=(0 0 0 0 0 0 0  0 0  0 0 0 0 0  0 0  0 0) ;;
         c) rm -f "$CONFIG_FILE" && echo "  Saved config cleared." ;;
