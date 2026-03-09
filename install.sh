@@ -92,7 +92,7 @@ show_menu() {
     echo "└──────────────────────────────────────────────────────────────┘"
     echo ""
     echo "  Enter number(s) to toggle (e.g. '3' or '1 4 7')"
-    echo "  'a' = select all  |  'n' = deselect all  |  'done' = confirm"
+    echo "  'a' = select all  |  'n' = deselect all  |  'c' = clear saved config  |  'done' = confirm"
 }
 
 while true; do
@@ -102,6 +102,7 @@ while true; do
         done) break ;;
         a) SELECTED=(1 1 1 1 1 1 1  1 1  1 1 1 1 1  1 1  1 1) ;;
         n) SELECTED=(0 0 0 0 0 0 0  0 0  0 0 0 0 0  0 0  0 0) ;;
+        c) rm -f "$CONFIG_FILE" && echo "  Saved config cleared." ;;
         *)
             for num in $input; do
                 if [[ "$num" =~ ^[0-9]+$ ]] && (( num >= 1 && num <= ${#SERVICES[@]} )); then
