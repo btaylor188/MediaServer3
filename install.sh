@@ -320,6 +320,29 @@ EOF
     sudo chown "${PUID}:${PGID}" "${DOCKERPATH}/radarr/config.xml"
 fi
 
+if is_selected prowlarr && [[ ! -f "${DOCKERPATH}/prowlarr/config.xml" ]]; then
+    make_dir "${DOCKERPATH}/prowlarr"
+    PROWLARR_API_KEY=$(tr -dc 'a-f0-9' < /dev/urandom | head -c 32)
+    sudo tee "${DOCKERPATH}/prowlarr/config.xml" > /dev/null <<EOF
+<Config>
+  <BindAddress>*</BindAddress>
+  <Port>9696</Port>
+  <SslPort>6969</SslPort>
+  <EnableSsl>False</EnableSsl>
+  <LaunchBrowser>True</LaunchBrowser>
+  <ApiKey>${PROWLARR_API_KEY}</ApiKey>
+  <AuthenticationMethod>External</AuthenticationMethod>
+  <Branch>master</Branch>
+  <LogLevel>info</LogLevel>
+  <UrlBase></UrlBase>
+  <UpdateMechanism>Docker</UpdateMechanism>
+  <AnalyticsEnabled>True</AnalyticsEnabled>
+  <InstanceName>Prowlarr</InstanceName>
+</Config>
+EOF
+    sudo chown "${PUID}:${PGID}" "${DOCKERPATH}/prowlarr/config.xml"
+fi
+
 # ─────────────────────────────────────────────
 #  Deploy selected services
 # ─────────────────────────────────────────────
