@@ -160,12 +160,12 @@ if is_selected duckdns || is_selected speedtest; then
     ask "Domain name" DOMAINNAME
 fi
 
-if is_selected nzbget || is_selected tdarr; then
+if is_selected nzbget || is_selected tdarr || is_selected qbittorrentvpn; then
     ask "Path for temp processing (e.g. /opt/processing)" PROCESSPATH
     make_dir "$PROCESSPATH"
 fi
 
-if is_selected nzbget || is_selected sonarr || is_selected radarr || is_selected tdarr || is_selected plex; then
+if is_selected nzbget || is_selected sonarr || is_selected radarr || is_selected tdarr || is_selected plex || is_selected qbittorrentvpn; then
     ask "Path for media (e.g. /mnt/media)" MEDIAPATH
     make_dir "$MEDIAPATH"
 fi
