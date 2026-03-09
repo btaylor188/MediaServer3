@@ -8,13 +8,16 @@ set -e
 CONFIG_FILE="${HOME}/.mediaserver3"
 [[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
 
-# Prompt with a saved default — press Enter to keep, or type to override
+# Prompt with a saved/default value — press Enter to accept, or type to override
 ask() {
-    local prompt="$1" varname="$2" current="${!2}"
-    if [[ -n "$current" ]]; then
-        read -r -p "$prompt [$current]: " input
+    local prompt="$1" varname="$2" fallback="${3:-}" current="${!2}"
+    local effective="${current:-$fallback}"
+    if [[ -n "$effective" ]]; then
+        read -r -p "$prompt [$effective]: " input
         if [[ -n "$input" ]]; then
             printf -v "$varname" '%s' "$input"
+        else
+            printf -v "$varname" '%s' "$effective"
         fi
     else
         read -r -p "$prompt: " "$varname"
@@ -151,22 +154,22 @@ PGID=$(id -g)
 echo ""
 echo "── Required Settings ──"
 
-ask "Path for Docker data (e.g. /opt/docker)" DOCKERPATH
+ask "Path for Docker data" DOCKERPATH "/opt/docker"
 make_dir "$DOCKERPATH"
 
-ask "Timezone (e.g. America/Denver)" TZ
+ask "Timezone" TZ "America/Denver"
 
 if is_selected duckdns || is_selected speedtest; then
     ask "Domain name" DOMAINNAME
 fi
 
 if is_selected nzbget || is_selected tdarr || is_selected qbittorrentvpn; then
-    ask "Path for temp processing (e.g. /opt/processing)" PROCESSPATH
+    ask "Path for temp processing" PROCESSPATH "/opt/processing"
     make_dir "$PROCESSPATH"
 fi
 
 if is_selected nzbget || is_selected sonarr || is_selected radarr || is_selected tdarr || is_selected plex || is_selected qbittorrentvpn; then
-    ask "Path for media (e.g. /mnt/media)" MEDIAPATH
+    ask "Path for media" MEDIAPATH "/mnt/media"
     make_dir "$MEDIAPATH"
 fi
 
@@ -194,8 +197,7 @@ if is_selected duckdns; then
 fi
 
 if is_selected qbittorrentvpn; then
-    GLUETUN_VPN_TYPE="${GLUETUN_VPN_TYPE:-wireguard}"
-    ask "VPN type for qBittorrent+VPN (wireguard/openvpn)" GLUETUN_VPN_TYPE
+    ask "VPN type for qBittorrent+VPN (wireguard/openvpn)" GLUETUN_VPN_TYPE "wireguard"
     if [[ "$GLUETUN_VPN_TYPE" == "wireguard" ]]; then
         make_dir "${DOCKERPATH}/gluetun/wireguard"
     else
