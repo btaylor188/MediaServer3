@@ -34,7 +34,7 @@ LABELS=(
     "oCIS              ownCloud Infinite Scale (requires URL)"
 )
 
-GROUPS=(
+SVC_GROUPS=(
     "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure" "Infrastructure"
     "Downloaders" "Downloaders"
     "*ARR!" "*ARR!" "*ARR!" "*ARR!" "*ARR!"
@@ -61,7 +61,7 @@ show_menu() {
     echo "├──────────────────────────────────────────────────────────────┤"
     local last_group=""
     for i in "${!SERVICES[@]}"; do
-        local group="${GROUPS[$i]}"
+        local group="${SVC_GROUPS[$i]}"
         if [[ "$group" != "$last_group" ]]; then
             local key="${GROUP_KEYS[$group]}"
             printf "│                                                              │\n"
@@ -95,11 +95,11 @@ while true; do
             # Determine current state: if all in group are selected, deselect; else select all
             all_on=1
             for i in "${!SERVICES[@]}"; do
-                [[ "${GROUPS[$i]}" == "$target_group" && "${SELECTED[$i]}" == "0" ]] && all_on=0 && break
+                [[ "${SVC_GROUPS[$i]}" == "$target_group" && "${SELECTED[$i]}" == "0" ]] && all_on=0 && break
             done
             new_val=$(( 1 - all_on ))
             for i in "${!SERVICES[@]}"; do
-                [[ "${GROUPS[$i]}" == "$target_group" ]] && SELECTED[$i]=$new_val
+                [[ "${SVC_GROUPS[$i]}" == "$target_group" ]] && SELECTED[$i]=$new_val
             done
             ;;
         *)
