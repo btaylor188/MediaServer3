@@ -26,7 +26,7 @@ services:
     volumes:
       - ${DOCKERPATH}/plex/database:/config
       - /dev/shm:/transcode
-      - ${MEDIAPATH}:/mnt/Media
+      - ${MEDIAPATH:-/mnt/Media}:/mnt/Media
     restart: always
     image: plexinc/pms-docker
     labels:
