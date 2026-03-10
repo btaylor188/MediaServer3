@@ -5,8 +5,8 @@ services:
         ports:
             - 7878:7878
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${PUID}
+            - PGID=${PGID}
             - HOME=/root
             - TERM=xterm
             - XDG_CONFIG_HOME=/config/xdg
@@ -14,8 +14,8 @@ services:
             - LANG=en_US.UTF-8
         volumes:
           - /etc/localtime:/etc/localtime
-          - $DOCKERPATH/radarr:/config
-          - $MEDIAPATH:/mnt/Media
+          - ${DOCKERPATH}/radarr:/config
+          - ${MEDIAPATH}:/mnt/Media
         networks:
           - internal
         restart: always

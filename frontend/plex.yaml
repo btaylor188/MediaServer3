@@ -15,17 +15,17 @@ services:
             - 32413:32413/udp
             - 32414:32414/udp
         environment:
-            - TZ=America/Denver
+            - TZ=${TZ}
             - NVIDIA_VISIBLE_DEVICES=all
             - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
-            - PLEX_CLAIM=$PLEXCLAIM
+            - PLEX_CLAIM=${PLEXCLAIM}
         networks:
           - internal
           - external
         volumes:
-          - $DOCKERPATH/plex/database:/config
+          - ${DOCKERPATH}/plex/database:/config
           - /dev/shm:/transcode
-          - $MEDIAPATH:/mnt/unionfs/Media
+          - ${MEDIAPATH}:/mnt/Media
         restart: always
         image: plexinc/pms-docker
 networks:

@@ -3,13 +3,13 @@ services:
     seerr:
         container_name: seerr
         environment:
-            - PUID=1000
-            - PGID=1000
-            - TZ=America/Denver
+            - PUID=${PUID}
+            - PGID=${PGID}
+            - TZ=${TZ}
         ports:
             - 5055:5055
         volumes:
-            - $DOCKERPATH/seerr/config:/config
+            - ${DOCKERPATH}/seerr/config:/app/config
         restart: unless-stopped
         image: ghcr.io/seerr-team/seerr:latest
 networks:

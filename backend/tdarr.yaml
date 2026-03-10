@@ -3,18 +3,18 @@ services:
     tdarr:
         container_name: tdarr_server
         volumes:
-          - $DOCKERPATH/tdarr/server:/app/server
-          - $DOCKERPATH/tdarr/configs:/app/configs
-          - $DOCKERPATH/tdarr/logs:/app/logs
-          - $MEDIAPATH:/media
-          - /temp:/temp
+          - ${DOCKERPATH}/tdarr/server:/app/server
+          - ${DOCKERPATH}/tdarr/configs:/app/configs
+          - ${DOCKERPATH}/tdarr/logs:/app/logs
+          - ${MEDIAPATH}:/media
+          - ${PROCESSPATH}:/temp
         environment:
           - serverIP=0.0.0.0
           - serverPort=8266
           - webUIPort=8265
-          - TZ=America/Denver
-          - PUID=1000
-          - PGID=1000
+          - TZ=${TZ}
+          - PUID=${PUID}
+          - PGID=${PGID}
         ports:
           - 8265:8265
           - 8266:8266
@@ -26,18 +26,18 @@ services:
     tdarr_node:
         container_name: tdarr_node
         volumes:
-          - $DOCKERPATH/tdarr/configs:/app/configs
-          - $DOCKERPATH/tdarr/logs:/app/logs
-          - $MEDIAPATH:/media
-          - /temp:/temp
+          - ${DOCKERPATH}/tdarr/configs:/app/configs
+          - ${DOCKERPATH}/tdarr/logs:/app/logs
+          - ${MEDIAPATH}:/media
+          - ${PROCESSPATH}:/temp
         network_mode: service:tdarr
         environment:
           - nodeID=Node1
           - serverIP=0.0.0.0
           - serverPort=8266
-          - TZ=America/Denver
-          - PUID=1000
-          - PGID=1000
+          - TZ=${TZ}
+          - PUID=${PUID}
+          - PGID=${PGID}
           - NVIDIA_DRIVER_CAPABILITIES=all
           - NVIDIA_VISIBLE_DEVICES=all
         ports:

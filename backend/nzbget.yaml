@@ -6,15 +6,15 @@ services:
             - 6789:6789
         environment:
             - LC_ALL=C
-            - PUID=1000
-            - PGID=1000
+            - PUID=${PUID}
+            - PGID=${PGID}
             - HOME=/root
             - TERM=xterm
         volumes:
           - /etc/localtime:/etc/localtime
-          - $DOCKERPATH/nzbget:/config
-          - $DOCKERRPATH/processing:/mnt/processing
-          - $MEDIAPATH:/mnt/Media
+          - ${DOCKERPATH}/nzbget:/config
+          - ${PROCESSPATH}:/mnt/processing
+          - ${MEDIAPATH}:/mnt/Media
           - /tmp:/tmp
         networks:
           - internal

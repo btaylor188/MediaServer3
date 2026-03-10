@@ -1,6 +1,8 @@
 #!/bin/bash
 
-set -e
+set -eu
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # ─────────────────────────────────────────────
 #  Saved config (paths and domain name)
@@ -10,7 +12,7 @@ CONFIG_FILE="${HOME}/.mediaserver3"
 
 # Prompt with a saved/default value — press Enter to accept, or type to override
 ask() {
-    local prompt="$1" varname="$2" fallback="${3:-}" current="${!2}"
+    local prompt="$1" varname="$2" fallback="${3:-}" current="${!2:-}"
     local effective="${current:-$fallback}"
     if [[ -n "$effective" ]]; then
         read -r -p "$prompt [$effective]: " input
@@ -42,7 +44,7 @@ EOF
 
 # Remove .env files on exit (success or failure)
 cleanup() {
-    rm -f ./frontend/.env ./backend/.env ./infrastructure/.env
+    rm -f "$SCRIPT_DIR/frontend/.env" "$SCRIPT_DIR/backend/.env" "$SCRIPT_DIR/infrastructure/.env"
 }
 trap cleanup EXIT
 
@@ -111,14 +113,16 @@ while true; do
     read -rp "  > " input
     case "$input" in
         go) break ;;
-        a) SELECTED=(1 1 1 1 1 1 1  1 1  1 1 1 1  1 1  1 1) ;;
-        n) SELECTED=(0 0 0 0 0 0 0  0 0  0 0 0 0  0 0  0 0) ;;
+        a) SELECTED=(); for _ in "${SERVICES[@]}"; do SELECTED+=(1); done ;;
+        n) SELECTED=(); for _ in "${SERVICES[@]}"; do SELECTED+=(0); done ;;
         c) rm -f "$CONFIG_FILE" && echo "  Saved config cleared." ;;
         *)
             for num in $input; do
                 if [[ "$num" =~ ^[0-9]+$ ]] && (( num >= 1 && num <= ${#SERVICES[@]} )); then
                     idx=$((num - 1))
                     [[ "${SELECTED[$idx]}" == "1" ]] && SELECTED[$idx]=0 || SELECTED[$idx]=1
+                else
+                    echo "  Invalid selection: $num (valid range: 1-${#SERVICES[@]})"
                 fi
             done
             ;;
@@ -200,8 +204,13 @@ if is_selected qbittorrentvpn; then
         read -rs OPENVPN_PASSWORD
         echo
         echo "Paste your OpenVPN config file contents, then press Ctrl+D on a new line:"
-        cat > "${DOCKERPATH}/gluetun/custom.conf"
-        echo "Config written to ${DOCKERPATH}/gluetun/custom.conf"
+        _ovpn_content=$(cat)
+        if [[ -z "$_ovpn_content" ]]; then
+            echo "Warning: OpenVPN config is empty. You must place a valid config at ${DOCKERPATH}/gluetun/custom.conf before starting gluetun."
+        else
+            printf '%s\n' "$_ovpn_content" > "${DOCKERPATH}/gluetun/custom.conf"
+            echo "Config written to ${DOCKERPATH}/gluetun/custom.conf"
+        fi
     fi
 fi
 
@@ -246,14 +255,14 @@ TZ=${TZ}
 PUID=${PUID}
 PGID=${PGID}"
 
-printf '%s\nNCDBROOT=%s\nNCDBUSER=%s\n' "$COMMON_ENV" "${NCDBROOT:-}" "${NCDBUSER:-}" > ./frontend/.env
-printf '%s\n' "$COMMON_ENV" > ./backend/.env
-printf '%s\n' "$COMMON_ENV" > ./infrastructure/.env
+printf '%s\nNCDBROOT=%s\nNCDBUSER=%s\n' "$COMMON_ENV" "${NCDBROOT:-}" "${NCDBUSER:-}" > "$SCRIPT_DIR/frontend/.env"
+printf '%s\n' "$COMMON_ENV" > "$SCRIPT_DIR/backend/.env"
+printf '%s\n' "$COMMON_ENV" > "$SCRIPT_DIR/infrastructure/.env"
 
 # ─────────────────────────────────────────────
 #  Install Docker
 # ─────────────────────────────────────────────
-bash ./docker.sh
+bash "$SCRIPT_DIR/docker.sh"
 
 # ─────────────────────────────────────────────
 #  Create Docker networks (idempotent)
@@ -357,11 +366,11 @@ FRONTEND_ARGS=$(profile_args plex seerr)
 NEXTCLOUD_ARGS=$(profile_args nextcloud)
 OCIS_ARGS=$(profile_args ocis)
 
-[[ -n "$INFRA_ARGS" ]]     && sudo docker compose -f ./infrastructure/docker-compose.yaml $INFRA_ARGS up -d
-[[ -n "$BACKEND_ARGS" ]]   && sudo docker compose -f ./backend/docker-compose.yaml $BACKEND_ARGS up -d
-[[ -n "$FRONTEND_ARGS" ]]  && sudo docker compose -f ./frontend/docker-compose.yaml $FRONTEND_ARGS up -d
-[[ -n "$NEXTCLOUD_ARGS" ]] && sudo docker compose -f ./frontend/nextcloud.yaml $NEXTCLOUD_ARGS up -d
-[[ -n "$OCIS_ARGS" ]]      && sudo docker compose -f ./frontend/ocis.yaml $OCIS_ARGS up -d
+[[ -n "$INFRA_ARGS" ]]     && sudo docker compose -f "$SCRIPT_DIR/infrastructure/docker-compose.yaml" $INFRA_ARGS up -d
+[[ -n "$BACKEND_ARGS" ]]   && sudo docker compose -f "$SCRIPT_DIR/backend/docker-compose.yaml" $BACKEND_ARGS up -d
+[[ -n "$FRONTEND_ARGS" ]]  && sudo docker compose -f "$SCRIPT_DIR/frontend/docker-compose.yaml" $FRONTEND_ARGS up -d
+[[ -n "$NEXTCLOUD_ARGS" ]] && sudo docker compose -f "$SCRIPT_DIR/frontend/nextcloud.yaml" $NEXTCLOUD_ARGS up -d
+[[ -n "$OCIS_ARGS" ]]      && sudo docker compose -f "$SCRIPT_DIR/frontend/ocis.yaml" $OCIS_ARGS up -d
 
 LOCAL_IP=$(hostname -I | awk '{print $1}')
 

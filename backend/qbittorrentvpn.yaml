@@ -10,7 +10,7 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - $DOCKERPATH/gluetun:/gluetun
+      - ${DOCKERPATH}/gluetun:/gluetun
     environment:
       - VPN_SERVICE_PROVIDER=custom
       - VPN_TYPE=${GLUETUN_VPN_TYPE}
@@ -18,6 +18,12 @@ services:
       - OPENVPN_USER=${OPENVPN_USER:-}
       - OPENVPN_PASSWORD=${OPENVPN_PASSWORD:-}
       - FIREWALL_INPUT_PORTS=8080
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/v1/server/state"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - internal
     restart: unless-stopped
@@ -30,11 +36,11 @@ services:
       gluetun:
         condition: service_healthy
     environment:
-      - PUID=1000
-      - PGID=1000
+      - PUID=${PUID}
+      - PGID=${PGID}
       - WEBUI_PORT=8080
     volumes:
-      - $DOCKERPATH/qbittorrent:/config
-      - $MEDIAPATH:/mnt/Media
-      - $PROCESSPATH:/mnt/processing
+      - ${DOCKERPATH}/qbittorrent:/config
+      - ${MEDIAPATH}:/mnt/Media
+      - ${PROCESSPATH}:/mnt/processing
     restart: unless-stopped

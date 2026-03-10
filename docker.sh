@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Function to check if the system is Debian-based
 is_debian_based() {
     [ -f /etc/debian_version ]
@@ -35,7 +37,7 @@ install_docker_debian() {
     sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
     # Add the current user to the docker group
-    sudo usermod -aG docker $USER
+    sudo usermod -aG docker "$USER"
 }
 
 # Function to install Docker on RHEL-based systems
@@ -57,7 +59,7 @@ install_docker_rhel() {
     sudo systemctl enable docker
 
     # Add the current user to the docker group
-    sudo usermod -aG docker $USER
+    sudo usermod -aG docker "$USER"
 }
 
 # Main script execution

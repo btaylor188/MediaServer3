@@ -8,11 +8,11 @@ services:
         entrypoint:
             - /portainer
         environment:
-            - PUID=1000
-            - PGID=1000
+            - PUID=${PUID}
+            - PGID=${PGID}
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - $DOCKERPATH/portainer/data:/data
+            - ${DOCKERPATH}/portainer/data:/data
         networks:
           - internal
         restart: always
