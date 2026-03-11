@@ -129,7 +129,5 @@ Two Docker bridge networks are created automatically:
 mediaserver3/
 ├── install.sh               # Main installer
 ├── docker.sh                # Docker engine installer
-├── infrastructure/          # Portainer, WUD, Netdata, DuckDNS, Uptime Kuma, Cloudflared, Speedtest
-├── backend/                 # NZBGet, qBittorrent+VPN, Prowlarr, Sonarr, Radarr, Tdarr
-└── frontend/                # Plex, Seerr, Nextcloud, oCIS
+└── docker-compose.yaml      # All services (profile-gated)
 ```

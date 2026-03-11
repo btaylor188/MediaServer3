@@ -42,9 +42,9 @@ GLUETUN_VPN_TYPE="${GLUETUN_VPN_TYPE:-wireguard}"
 EOF
 }
 
-# Remove .env files on exit (success or failure)
+# Remove .env on exit (success or failure)
 cleanup() {
-    rm -f "$SCRIPT_DIR/frontend/.env" "$SCRIPT_DIR/backend/.env" "$SCRIPT_DIR/infrastructure/.env"
+    rm -f "$SCRIPT_DIR/.env"
 }
 trap cleanup EXIT
 
@@ -237,9 +237,10 @@ if is_selected ocis; then
 fi
 
 # ─────────────────────────────────────────────
-#  Write .env files
+#  Write .env file
 # ─────────────────────────────────────────────
-COMMON_ENV="DOMAINNAME=${DOMAINNAME}
+cat > "$SCRIPT_DIR/.env" <<EOF
+DOMAINNAME=${DOMAINNAME}
 DOCKERPATH=${DOCKERPATH}
 PROCESSPATH=${PROCESSPATH}
 MEDIAPATH=${MEDIAPATH}
@@ -251,13 +252,12 @@ GLUETUN_VPN_TYPE=${GLUETUN_VPN_TYPE:-wireguard}
 OPENVPN_USER=${OPENVPN_USER:-}
 OPENVPN_PASSWORD=${OPENVPN_PASSWORD:-}
 OCIS_URL=${OCIS_URL:-}
+NCDBROOT=${NCDBROOT:-}
+NCDBUSER=${NCDBUSER:-}
 TZ=${TZ}
 PUID=${PUID}
-PGID=${PGID}"
-
-printf '%s\nNCDBROOT=%s\nNCDBUSER=%s\n' "$COMMON_ENV" "${NCDBROOT:-}" "${NCDBUSER:-}" > "$SCRIPT_DIR/frontend/.env"
-printf '%s\n' "$COMMON_ENV" > "$SCRIPT_DIR/backend/.env"
-printf '%s\n' "$COMMON_ENV" > "$SCRIPT_DIR/infrastructure/.env"
+PGID=${PGID}
+EOF
 
 # ─────────────────────────────────────────────
 #  Install Docker
@@ -360,17 +360,13 @@ fi
 # ─────────────────────────────────────────────
 #  Deploy selected services
 # ─────────────────────────────────────────────
-INFRA_ARGS=$(profile_args portainer wud netdata duckdns uptime-kuma cloudflared speedtest)
-BACKEND_ARGS=$(profile_args nzbget qbittorrentvpn prowlarr sonarr radarr tdarr)
-FRONTEND_ARGS=$(profile_args plex seerr)
-NEXTCLOUD_ARGS=$(profile_args nextcloud)
-OCIS_ARGS=$(profile_args ocis)
+ALL_ARGS=$(profile_args portainer wud netdata duckdns uptime-kuma cloudflared speedtest \
+                        nzbget qbittorrentvpn \
+                        prowlarr sonarr radarr tdarr \
+                        plex seerr \
+                        nextcloud ocis)
 
-[[ -n "$INFRA_ARGS" ]]     && sudo docker compose -f "$SCRIPT_DIR/infrastructure/docker-compose.yaml" $INFRA_ARGS up -d
-[[ -n "$BACKEND_ARGS" ]]   && sudo docker compose -f "$SCRIPT_DIR/backend/docker-compose.yaml" $BACKEND_ARGS up -d
-[[ -n "$FRONTEND_ARGS" ]]  && sudo docker compose -f "$SCRIPT_DIR/frontend/docker-compose.yaml" $FRONTEND_ARGS up -d
-[[ -n "$NEXTCLOUD_ARGS" ]] && sudo docker compose -f "$SCRIPT_DIR/frontend/nextcloud.yaml" $NEXTCLOUD_ARGS up -d
-[[ -n "$OCIS_ARGS" ]]      && sudo docker compose -f "$SCRIPT_DIR/frontend/ocis.yaml" $OCIS_ARGS up -d
+[[ -n "$ALL_ARGS" ]] && sudo docker compose -f "$SCRIPT_DIR/docker-compose.yaml" $ALL_ARGS up -d
 
 LOCAL_IP=$(hostname -I | awk '{print $1}')
 
