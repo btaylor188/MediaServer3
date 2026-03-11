@@ -83,6 +83,8 @@ chmod +x install.sh
 |---|---------|------|-------|
 | 16 | Nextcloud | 8087 | Self-hosted file storage; DB credentials required |
 | 17 | oCIS | 9200 | ownCloud Infinite Scale; URL required |
+| 18 | Immich | 2283 | Self-hosted photo & video backup; DB credentials required |
+| 19 | Seafile | 8090 | Self-hosted file sync & share; DB and admin credentials required |
 
 ---
 
@@ -109,6 +111,12 @@ Uses [Gluetun](https://github.com/qdm12/gluetun) as a VPN sidecar — works with
 
 ### Seerr
 Unified successor to Overseerr and Jellyseerr (merged February 2026). Config is fully compatible — existing Overseerr data migrates automatically on first start.
+
+### Immich
+Self-hosted Google Photos alternative. Deploys four containers: `immich-server`, `immich-machine-learning`, `immich-postgres` (pgvecto-rs), and `immich-redis`. The photo library path is prompted during install and can be any local or mounted path.
+
+### Seafile
+Self-hosted Dropbox alternative. Deploys three containers: `seafile`, `seafile-db` (MariaDB), and `seafile-memcached`. The server hostname is used to generate download links — set it to your domain or server IP.
 
 ### Saved Config
 Paths and domain name are saved to `~/.mediaserver3` after each run. Type `c` in the service menu to clear it and start fresh.

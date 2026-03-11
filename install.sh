@@ -51,7 +51,7 @@ trap cleanup EXIT
 # ─────────────────────────────────────────────
 #  Service selection menu
 # ─────────────────────────────────────────────
-SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget qbittorrentvpn prowlarr sonarr radarr tdarr plex seerr nextcloud ocis)
+SERVICES=(portainer wud netdata duckdns uptime-kuma cloudflared speedtest nzbget qbittorrentvpn prowlarr sonarr radarr tdarr plex seerr nextcloud ocis immich seafile)
 
 LABELS=(
     "Portainer         Docker management UI"
@@ -71,6 +71,8 @@ LABELS=(
     "Seerr             Media requests"
     "Nextcloud         File storage (needs DB creds)"
     "oCIS              ownCloud Infinite Scale (URL)"
+    "Immich            Photo & video backup (needs DB creds)"
+    "Seafile           File sync & share (needs DB creds)"
 )
 
 SVC_GROUPS=(
@@ -78,11 +80,11 @@ SVC_GROUPS=(
     "Downloaders" "Downloaders"
     "*ARR!" "*ARR!" "*ARR!" "*ARR!"
     "Media Server" "Media Server"
-    "Private Cloud" "Private Cloud"
+    "Private Cloud" "Private Cloud" "Private Cloud" "Private Cloud"
 )
 
-# Default: all selected except Cloudflared, Nextcloud, and oCIS
-SELECTED=(1 1 0 0 0 1 0  1 0  1 1 1 0  1 0  0 0)
+# Default: all selected except Cloudflared, Nextcloud, oCIS, Immich, and Seafile
+SELECTED=(1 1 0 0 0 1 0  1 0  1 1 1 0  1 0  0 0 0 0)
 
 show_menu() {
     echo ""
@@ -236,6 +238,31 @@ if is_selected ocis; then
     make_dir "${DOCKERPATH}/ocis/data"
 fi
 
+if is_selected immich; then
+    ask "Path for Immich photo library" IMMICH_UPLOAD_LOCATION "${DOCKERPATH}/immich/upload"
+    make_dir "${IMMICH_UPLOAD_LOCATION}"
+    make_dir "${DOCKERPATH}/immich/postgres"
+    make_dir "${DOCKERPATH}/immich/model-cache"
+    echo "Immich DB password:"
+    read -rs IMMICH_DB_PASSWORD
+    echo
+fi
+
+if is_selected seafile; then
+    echo "Seafile server hostname (e.g. files.yourdomain.com or your server IP):"
+    read -r SEAFILE_HOSTNAME
+    make_dir "${DOCKERPATH}/seafile/data"
+    make_dir "${DOCKERPATH}/seafile/db"
+    echo "Seafile DB root password:"
+    read -rs SEAFILE_DB_ROOT_PASSWORD
+    echo
+    echo "Seafile admin email:"
+    read -r SEAFILE_ADMIN_EMAIL
+    echo "Seafile admin password:"
+    read -rs SEAFILE_ADMIN_PASSWORD
+    echo
+fi
+
 # ─────────────────────────────────────────────
 #  Write .env file
 # ─────────────────────────────────────────────
@@ -254,6 +281,12 @@ OPENVPN_PASSWORD=${OPENVPN_PASSWORD:-}
 OCIS_URL=${OCIS_URL:-}
 NCDBROOT=${NCDBROOT:-}
 NCDBUSER=${NCDBUSER:-}
+IMMICH_UPLOAD_LOCATION=${IMMICH_UPLOAD_LOCATION:-}
+IMMICH_DB_PASSWORD=${IMMICH_DB_PASSWORD:-}
+SEAFILE_HOSTNAME=${SEAFILE_HOSTNAME:-}
+SEAFILE_DB_ROOT_PASSWORD=${SEAFILE_DB_ROOT_PASSWORD:-}
+SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL:-}
+SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD:-}
 TZ=${TZ}
 PUID=${PUID}
 PGID=${PGID}
@@ -364,7 +397,7 @@ ALL_ARGS=$(profile_args portainer wud netdata duckdns uptime-kuma cloudflared sp
                         nzbget qbittorrentvpn \
                         prowlarr sonarr radarr tdarr \
                         plex seerr \
-                        nextcloud ocis)
+                        nextcloud ocis immich seafile)
 
 [[ -n "$ALL_ARGS" ]] && sudo docker compose -f "$SCRIPT_DIR/docker-compose.yaml" $ALL_ARGS up -d
 
@@ -403,6 +436,8 @@ is_selected plex         && print_url "Plex"           "http://${LOCAL_IP}:32400
 is_selected seerr        && print_url "Seerr"           "http://${LOCAL_IP}:5055"
 is_selected nextcloud    && print_url "Nextcloud"      "http://${LOCAL_IP}:8087"
 is_selected ocis         && print_url "oCIS"           "${OCIS_URL}"
+is_selected immich       && print_url "Immich"         "http://${LOCAL_IP}:2283"
+is_selected seafile      && print_url "Seafile"        "http://${LOCAL_IP}:8090"
 is_selected duckdns      && print_url "DuckDNS"        "(no UI — managing ${DOMAINNAME}.duckdns.org)"
 is_selected cloudflared  && print_url "Cloudflared"    "(no UI — tunnel active)"
 

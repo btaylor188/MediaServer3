@@ -433,3 +433,114 @@ services:
       driver: local
     labels:
       - wud.watch=true
+
+  immich-server:
+    container_name: immich_server
+    profiles: [immich]
+    image: ghcr.io/immich-app/immich-server:release
+    ports:
+      - 2283:2283
+    environment:
+      - DB_HOSTNAME=immich-postgres
+      - DB_USERNAME=immich
+      - DB_PASSWORD=${IMMICH_DB_PASSWORD}
+      - DB_DATABASE_NAME=immich
+      - REDIS_HOSTNAME=immich-redis
+    volumes:
+      - ${IMMICH_UPLOAD_LOCATION}:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - immich-redis
+      - immich-postgres
+    networks:
+      - internal
+    restart: always
+    labels:
+      - wud.watch=true
+
+  immich-machine-learning:
+    container_name: immich_machine_learning
+    profiles: [immich]
+    image: ghcr.io/immich-app/immich-machine-learning:release
+    volumes:
+      - ${DOCKERPATH}/immich/model-cache:/cache
+    environment:
+      - DB_HOSTNAME=immich-postgres
+      - DB_USERNAME=immich
+      - DB_PASSWORD=${IMMICH_DB_PASSWORD}
+      - DB_DATABASE_NAME=immich
+      - REDIS_HOSTNAME=immich-redis
+    networks:
+      - internal
+    restart: always
+    labels:
+      - wud.watch=true
+
+  immich-redis:
+    container_name: immich_redis
+    profiles: [immich]
+    image: docker.io/redis:6.2-alpine
+    networks:
+      - internal
+    restart: always
+
+  immich-postgres:
+    container_name: immich_postgres
+    profiles: [immich]
+    image: docker.io/tensorchord/pgvecto-rs:pg14-v0.2.0
+    environment:
+      - POSTGRES_PASSWORD=${IMMICH_DB_PASSWORD}
+      - POSTGRES_USER=immich
+      - POSTGRES_DB=immich
+    volumes:
+      - ${DOCKERPATH}/immich/postgres:/var/lib/postgresql/data
+    networks:
+      - internal
+    restart: always
+
+  seafile:
+    container_name: seafile
+    profiles: [seafile]
+    image: seafileltd/seafile-mc:latest
+    ports:
+      - 8090:80
+    volumes:
+      - ${DOCKERPATH}/seafile/data:/shared
+    environment:
+      - DB_HOST=seafile-db
+      - DB_ROOT_PASSWD=${SEAFILE_DB_ROOT_PASSWORD}
+      - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL}
+      - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWORD}
+      - SEAFILE_SERVER_HOSTNAME=${SEAFILE_HOSTNAME}
+      - SEAFILE_SERVER_LETSENCRYPT=false
+      - TIME_ZONE=${TZ}
+    depends_on:
+      - seafile-db
+      - seafile-memcached
+    networks:
+      - internal
+    restart: always
+    labels:
+      - wud.watch=true
+
+  seafile-db:
+    container_name: seafile-db
+    profiles: [seafile]
+    image: mariadb:10.11
+    environment:
+      - MYSQL_ROOT_PASSWORD=${SEAFILE_DB_ROOT_PASSWORD}
+      - MYSQL_LOG_CONSOLE=true
+    volumes:
+      - ${DOCKERPATH}/seafile/db:/var/lib/mysql
+    networks:
+      - internal
+    restart: always
+
+  seafile-memcached:
+    container_name: seafile-memcached
+    profiles: [seafile]
+    image: memcached:1.6-alpine
+    entrypoint: memcached -m 256
+    networks:
+      - internal
+    restart: always
