@@ -121,7 +121,6 @@ services:
       - ${MEDIAPATH}:/media
       - ${PROCESSPATH}:/temp
     network_mode: service:tdarr
-#    runtime: nvidia
     environment:
       - nodeID=Node01
       - serverIP=0.0.0.0
@@ -129,8 +128,6 @@ services:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
-#      - NVIDIA_DRIVER_CAPABILITIES=all
-#      - NVIDIA_VISIBLE_DEVICES=all
     devices:
       - /dev/dri:/dev/dri
     restart: always
@@ -177,28 +174,6 @@ services:
       - ${MEDIAPATH}:/mnt/Media
       - ${PROCESSPATH}:/mnt/processing
     restart: unless-stopped
-    labels:
-      - wud.watch=true
-  transmission-openvpn:
-    container_name: transmission-w-vpn
-    profiles: [transmission]
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ${DOCKERPATH}/processing:/data
-    environment:
-      - OPENVPN_PROVIDER=PIA
-      - OPENVPN_CONFIG=us_denver
-      - OPENVPN_USERNAME=${PIAUSER}
-      - OPENVPN_PASSWORD=${PIAPASS}
-      - LOCAL_NETWORK=${LOCALNET}
-      - PUID=${PUID}
-      - PGID=${PGID}
-    networks:
-      - internal
-    ports:
-      - 9091:9091
-    image: haugene/transmission-openvpn
     labels:
       - wud.watch=true
 networks:
