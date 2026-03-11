@@ -232,8 +232,9 @@ fi
 if is_selected ocis; then
     echo "oCIS URL (e.g. https://files.yourdomain.com or https://localhost:9200):"
     read -r OCIS_URL
-    make_dir "${DOCKERPATH}/ocis/config"
-    make_dir "${DOCKERPATH}/ocis/data"
+    # oCIS runs as UID 1000 internally — dirs must be owned by 1000:1000
+    sudo mkdir -p "${DOCKERPATH}/ocis/config" "${DOCKERPATH}/ocis/data"
+    sudo chown -R 1000:1000 "${DOCKERPATH}/ocis/config" "${DOCKERPATH}/ocis/data"
 fi
 
 # ─────────────────────────────────────────────
@@ -366,6 +367,7 @@ if is_selected ocis && [[ ! -f "${DOCKERPATH}/ocis/config/ocis.yaml" ]]; then
         -v "${DOCKERPATH}/ocis/data:/var/lib/ocis" \
         owncloud/ocis:latest init --insecure true 2>&1)
     OCIS_ADMIN_PASS=$(printf '%s\n' "$OCIS_INIT_OUTPUT" | grep 'password' | awk '{print $NF}')
+    sudo chown -R 1000:1000 "${DOCKERPATH}/ocis/config" "${DOCKERPATH}/ocis/data"
 fi
 
 # ─────────────────────────────────────────────
