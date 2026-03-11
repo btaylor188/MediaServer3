@@ -9,9 +9,7 @@ services:
     entrypoint:
       - /bin/sh
       - -c
-      - |
-        ocis init --insecure true || true
-        ocis server
+      - ocis server
     environment:
       - OCIS_URL=${OCIS_URL}
       - OCIS_INSECURE=true

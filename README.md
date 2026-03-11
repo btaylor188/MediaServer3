@@ -113,6 +113,11 @@ Uses [Gluetun](https://github.com/qdm12/gluetun) as a VPN sidecar with a killswi
 2. Enter your OpenVPN username and password when prompted
 3. Start the stack
 
+### oCIS
+The installer runs `ocis init` as a one-time Docker container before starting the stack. This generates the config at `${DOCKERPATH}/ocis/config/ocis.yaml` and sets a random admin password that is printed in the install summary. On subsequent runs (config already present) the init step is skipped and the password is not shown — retrieve it from `ocis.yaml` if needed.
+
+To override the admin password at any time, set `IDM_ADMIN_PASSWORD` as an environment variable in `ocis.yaml`.
+
 ### Seerr
 Unified successor to Overseerr and Jellyseerr (merged February 2026). Config is fully compatible — existing Overseerr data migrates automatically on first start.
 

@@ -357,6 +357,17 @@ EOF
     sudo chown -R "${PUID}:${PGID}" "${DOCKERPATH}/qbittorrent"
 fi
 
+OCIS_ADMIN_PASS=""
+if is_selected ocis && [[ ! -f "${DOCKERPATH}/ocis/config/ocis.yaml" ]]; then
+    echo "Initializing oCIS..."
+    OCIS_INIT_OUTPUT=$(sudo docker run --rm \
+        -e OCIS_INSECURE=true \
+        -v "${DOCKERPATH}/ocis/config:/etc/ocis" \
+        -v "${DOCKERPATH}/ocis/data:/var/lib/ocis" \
+        owncloud/ocis:latest init --insecure true 2>&1)
+    OCIS_ADMIN_PASS=$(printf '%s\n' "$OCIS_INIT_OUTPUT" | grep 'password' | awk '{print $NF}')
+fi
+
 # ─────────────────────────────────────────────
 #  Deploy selected services
 # ─────────────────────────────────────────────
@@ -406,7 +417,13 @@ is_selected tdarr        && print_url "Tdarr"          "http://${LOCAL_IP}:8265"
 is_selected plex         && print_url "Plex"           "http://${LOCAL_IP}:32400/web"
 is_selected seerr        && print_url "Seerr"           "http://${LOCAL_IP}:5055"
 is_selected nextcloud    && print_url "Nextcloud"      "http://${LOCAL_IP}:8087"
-is_selected ocis         && print_url "oCIS"           "${OCIS_URL}"
+if is_selected ocis; then
+    if [[ -n "$OCIS_ADMIN_PASS" ]]; then
+        print_url "oCIS" "${OCIS_URL}  (user: admin / pass: ${OCIS_ADMIN_PASS})"
+    else
+        print_url "oCIS" "${OCIS_URL}  (user: admin — password in ${DOCKERPATH}/ocis/config/ocis.yaml)"
+    fi
+fi
 is_selected duckdns      && print_url "DuckDNS"        "(no UI — managing ${DOMAINNAME}.duckdns.org)"
 is_selected cloudflared  && print_url "Cloudflared"    "(no UI — tunnel active)"
 
